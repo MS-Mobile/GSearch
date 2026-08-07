@@ -2,6 +2,30 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+      Required under Android 11+ package visibility. Without this, resolveActivity()
+      returns null for every candidate and the probe reports "does not resolve"
+      regardless of whether the intent would actually work.
+    -->
+    <!--
+      Required under Android 11+ package visibility. Without this, resolveActivity()
+      returns null and every launch fails.
+
+      Every chosen intent is pinned to the Google app, so declaring that one package
+      covers all of them — no per-intent entries needed.
+    -->
+    <queries>
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <!-- Standalone Lens, when present, is the preferred Lens target. -->
+        <package android:name="com.google.ar.lens" />
+        <!-- Fallback when Lens is not installed. -->
+        <package android:name="com.android.vending" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,6 +34,54 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GSearch" />
+        android:theme="@style/Theme.GSearch">
+
+        <!--
+          One activity serves both ways in: the launcher icon, and the widget's own
+          long-press settings entry (declared as android:configure in the provider info).
+          The APPWIDGET_CONFIGURE filter is not what makes the second case work — the
+          system starts the component named there directly — but it documents the role and
+          keeps the activity exported for the launcher that starts it.
+        -->
+        <activity
+            android:name=".config.ConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GSearch.Config">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Invisible hop between a widget button and the app it opens; see
+          WidgetActionActivity for why the click cannot go straight to the target. Excluded
+          from recents and given its own empty task affinity so it never appears as a task,
+          and noHistory so it cannot be returned to.
+        -->
+        <activity
+            android:name=".widget.WidgetActionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.GSearch.Invisible" />
+
+        <receiver
+            android:name=".widget.GSearchWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/gsearch_widget_info" />
+        </receiver>
+
+    </application>
 
 </manifest>

@@ -1,0 +1,32 @@
+# Overrides only. `buildUponDefaultConfig = true` in app/build.gradle.kts means every rule
+# not named here keeps detekt's own default, so this file stays short on purpose — the
+# generated full config is ~940 lines and goes stale silently on every detekt upgrade.
+#
+# Regenerate the full default for reference with `./gradlew detektGenerateConfig` into a
+# scratch path if you need to see what a rule's defaults actually are. Do not commit it.
+
+complexity:
+  LongMethod:
+    # A Compose layout function is a declarative tree, not procedural logic; its length is
+    # not the warning sign the same line count would be in ordinary code.
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    # Composables take one parameter per piece of hoisted state plus one callback each.
+    ignoreAnnotated: ['Composable']
+
+naming:
+  FunctionNaming:
+    # Composables that emit UI are PascalCase by Compose convention, which the default
+    # [a-z][a-zA-Z0-9]* pattern reads as a violation on every single one of them.
+    ignoreAnnotated: ['Composable']
+
+style:
+  MagicNumber:
+    # dp sizes, alpha fractions and colour literals read better inline than hoisted to a
+    # constant apiece. Outside composables the rule stays on, and it has already earned its
+    # keep there — see the named constants in WidgetConfig.
+    ignoreAnnotated: ['Composable']
+  ReturnCount:
+    # SearchIntents.lens is a four-step resolution chain. Early returns express it far more
+    # clearly than the nested if/else that a limit of 2 would force.
+    max: 4

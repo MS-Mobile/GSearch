@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      Opaque on purpose. See-through-ness is applied at runtime from the user's opacity
+      setting, so baking alpha in here would multiply with it and make 100% opacity
+      impossible to reach.
+
+      Split into unqualified day/night entries with a qualified alias on top. The drawable
+      wants the alias so the host picks the right one; Glance cannot use the alias, because
+      it needs both colours at once to build a day/night ColorProvider and resolving a
+      qualified resource would bake in whichever mode this process happens to be in. The
+      alias keeps each hex written once despite the two consumers.
+    -->
+    <color name="widget_pill_day">#F1F3F4</color>
+    <color name="widget_pill_night">#202124</color>
+    <color name="widget_pill_background">@color/widget_pill_day</color>
+    <color name="widget_icon_tint">#5F6368</color>
+
+    <string name="widget_label">GSearch</string>
+    <string name="widget_description">Google search bar with configurable buttons</string>
+
+    <string name="widget_action_search">Search</string>
+    <string name="widget_action_mic">Voice search</string>
+    <string name="widget_action_lens">Lens</string>
+    <string name="widget_action_gemini">Gemini</string>
+
+    <string name="config_title">Search bar</string>
+    <string name="config_buttons_heading">Buttons</string>
+    <string name="config_buttons_hint">Drag the handle to reorder. Tapping the bar itself always searches.</string>
+    <string name="config_reorder_description">Reorder %1$s</string>
+    <string name="config_opacity_heading">Opacity: %1$d%%</string>
+    <string name="config_add_to_home">Add to home screen</string>
+    <string name="config_done">Done</string>
+    <string name="widget_action_unavailable">The Google app can\'t handle that right now</string>
+
+</resources>

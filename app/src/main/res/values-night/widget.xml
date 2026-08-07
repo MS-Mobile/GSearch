@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Alias only; the hex lives unqualified in values/widget.xml. -->
+    <color name="widget_pill_background">@color/widget_pill_night</color>
+    <color name="widget_icon_tint">#E8EAED</color>
+
+</resources>

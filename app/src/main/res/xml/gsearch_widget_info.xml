@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sized for a compact pill rather than a full-width bar.
+
+  Three visible buttons need ~155dp once One UI's 0.833 render scale is accounted for
+  (see widget_dimens.xml), so a two-cell default clipped the last icon. Three cells fits
+  the default search + mic + lens. Enabling a fourth slot needs a manual resize — the
+  widget cannot grow its own cell.
+
+  Resizable horizontally: the pill stays centred and simply gets more room around it.
+
+  configure + widgetFeatures put a settings entry in the launcher's long-press menu.
+  `configuration_optional` is what keeps the widget usable the moment it is dropped: the
+  defaults are already sensible, so there is no reason to force a setup screen first.
+  Both attributes are API 31+; below that the launcher shows no entry and the app's own
+  launcher icon is the way in, which is why the settings screen is a normal Activity
+  rather than a configure-only one.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.msmobile.gsearch.config.ConfigActivity"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/widget_search_bar"
+    android:minHeight="48dp"
+    android:minResizeWidth="110dp"
+    android:minWidth="170dp"
+    android:previewLayout="@layout/widget_search_bar"
+    android:resizeMode="horizontal"
+    android:targetCellHeight="1"
+    android:targetCellWidth="3"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable|configuration_optional" />

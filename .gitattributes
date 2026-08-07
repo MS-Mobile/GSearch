@@ -1,0 +1,12 @@
+# This repo is developed on Windows with core.autocrlf=true, which would otherwise hand
+# Spotless CRLF files while .editorconfig asks for LF — every line of every file then reads
+# as a violation. Pinning eol here overrides autocrlf and makes git, Spotless and ktlint
+# agree. Spotless reads these attributes directly (its default lineEndings is GIT_ATTRIBUTES).
+* text=auto eol=lf
+
+*.bat text eol=crlf
+
+*.jar binary
+*.png binary
+*.webp binary
+*.keystore binary

@@ -1,0 +1,43 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+# intellij_idea rather than ktlint_official: these sources were formatted by Android Studio,
+# and ktlint_official would rewrite most of them to no real benefit.
+ktlint_code_style = intellij_idea
+# 100, not the official 120. At 120 ktlint treats any wrapped expression that would fit on
+# one line as a violation and collapses it, which flattened several deliberately-wrapped
+# declarations in this codebase into worse one-liners.
+max_line_length = 100
+
+# Without these, ktlint collapses a multi-line parameter list back onto one line whenever it
+# fits, discarding the trailing comma. Allowing trailing commas makes an existing one a
+# signal to keep the list expanded — the same behaviour Android Studio's official style has.
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# Deliberately NOT set here: ktlint_function_signature_body_expression_wrapping and
+# ktlint_class_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than.
+# Both were tried to preserve this codebase's hand-tuned wrapping and both overcorrected —
+# they started expanding idiomatic `= when (this) {` bodies and two-line data classes. The
+# formatter's defaults win; the one-time reflow is the cost of having a formatter at all.
+
+# @Composable functions are PascalCase by convention, which the stock naming rule reads as a
+# violation. Exempting the annotation keeps the rule active for everything else.
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# Compose rules ship as a custom ruleset; ktlint disables unknown rulesets by default.
+ktlint_compose = enabled
+
+[*.{xml,yml,yaml,toml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

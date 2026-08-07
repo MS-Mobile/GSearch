@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  These are declared ~1.2x larger than the size they render at on One UI, and at exactly
+  the size they render at everywhere else. Both halves of that are now measured:
+
+    Samsung One UI (Galaxy S23, density 480)
+      Renders third-party widget RemoteViews at density 400 — a 0.833 factor, confirmed
+      across several declared sizes and a freshly added instance, and not caused by
+      targetCellWidth. 67dp declared measured 56dp on screen.
+
+    Pixel Launcher (emulator, API 36, density 480)
+      No rescale at all. 67dp declared measured 201px = 67dp on screen, and the glyph
+      measured 31dp against the 25dp it renders at on One UI.
+
+  So a single dp value cannot be right on both, and the 1.2x is kept because it targets
+  the device this was tuned and approved on. The cost is that the pill is about a fifth
+  larger on Pixel-family launchers — larger, not broken, and it still reads as a pill.
+
+  Fixing it properly means sizing in pixels the app computes itself, which needs
+  RemoteViews.setViewLayoutHeight (API 31+) for the bar; setViewPadding already takes
+  pixels at any API level. That is tracked in the roadmap rather than done here, because
+  it only pays off once there is a second device to keep honest.
+
+  Declared -> rendered on One UI (the tuned target):
+    bar height    67dp -> 56dp   (taller than the stock 48dp pill, by preference)
+    glyph         30dp -> 25dp   (same as the stock Google G)
+-->
+<resources>
+    <dimen name="widget_bar_height">67dp</dimen>
+    <!-- (67 - 30) / 2, keeping the glyph proportional as the pill grows. -->
+    <dimen name="widget_slot_padding">18dp</dimen>
+    <!-- Breathing room at the pill's ends, so the outer glyphs are not flush to the edge. -->
+    <dimen name="widget_bar_padding">10dp</dimen>
+</resources>

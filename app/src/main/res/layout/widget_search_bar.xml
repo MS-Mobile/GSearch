@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The pill fills the cell it is given, and the visible slots share that width equally —
+  one icon per launcher cell at the default 3-cell size. Hidden slots are GONE, so they
+  take no weight and the remaining icons redistribute evenly on their own.
+
+  Glyph size is set by the slots' vertical padding, not their width: with fitCenter the
+  drawable is bounded by the shorter axis, which is the height. That keeps the glyph at a
+  fixed size however wide the widget is resized.
+
+  The pill background is a separate ImageView rather than the row's own background so its
+  opacity can be changed at runtime. Setting a background colour on the row would replace
+  the shape drawable and square off the corners; setImageAlpha on an ImageView leaves the
+  shape intact and works at minSdk, unlike a background tint (API 31+). The shape has no
+  intrinsic size, so ImageView stretches it to fill the view exactly.
+
+  Sizing lives in res/values/widget_dimens.xml, which explains why the declared values do
+  not always equal the size they render at.
+
+  Slot positions are fixed: RemoteViews cannot add children at runtime, so the layout
+  declares every slot the widget could show and the provider hides the unused ones. The
+  src values below are the defaults, present so the widget picker's preview is not an
+  empty pill; the provider overwrites them on every bind. Only classes on the RemoteViews
+  whitelist are allowed here — a plain View makes the entire layout fail to inflate, with
+  the host reporting only "couldn't add widget".
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/widget_bar_height"
+        android:layout_gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/widget_bar_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_pill_background" />
+
+        <LinearLayout
+            android:id="@+id/widget_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/widget_bar_padding"
+            android:paddingEnd="@dimen/widget_bar_padding">
+
+            <ImageView
+                android:id="@+id/slot_0"
+                android:contentDescription="@string/widget_action_search"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/widget_slot_padding"
+                android:paddingBottom="@dimen/widget_slot_padding"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_widget_search" />
+
+            <ImageView
+                android:id="@+id/slot_1"
+                android:contentDescription="@string/widget_action_mic"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/widget_slot_padding"
+                android:paddingBottom="@dimen/widget_slot_padding"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_widget_mic" />
+
+            <ImageView
+                android:id="@+id/slot_2"
+                android:contentDescription="@string/widget_action_lens"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/widget_slot_padding"
+                android:paddingBottom="@dimen/widget_slot_padding"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_widget_lens" />
+
+            <ImageView
+                android:id="@+id/slot_3"
+                android:contentDescription="@string/widget_action_gemini"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/widget_slot_padding"
+                android:paddingBottom="@dimen/widget_slot_padding"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_widget_gemini"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</FrameLayout>

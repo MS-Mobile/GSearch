@@ -13,4 +13,23 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <!--
+      The settings screen draws its own Material 3 surfaces in Compose, so the platform
+      theme only has to stay out of the way: no action bar to sit above the Compose
+      content, and a window background that follows dark mode so there is no light flash
+      before the first frame.
+    -->
+    <!--
+      For the widget's launch trampoline: it must draw nothing at all, or tapping a widget
+      button would flash a blank screen before the real app appears.
+    -->
+    <style name="Theme.GSearch.Invisible" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <style name="Theme.GSearch.Config" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>
