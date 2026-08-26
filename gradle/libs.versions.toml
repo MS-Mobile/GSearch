@@ -1,12 +1,8 @@
 [versions]
 agp = "9.3.1"
-# Kotlin is supplied by AGP's built-in Kotlin support and is not settable here. Latest
-# standalone Kotlin is 2.4.10 if we ever move off built-in support.
-#
-# This must equal the Kotlin version AGP bundles, read from AGP's own POM
-# (com/android/tools/build/gradle/9.3.1 depends on kotlin-gradle-plugin 2.2.10). The
-# Compose compiler is versioned in lockstep with Kotlin, so bumping `agp` means checking
-# its POM again and bumping this to match.
+android-compile-sdk="37"
+android-min-sdk="26"
+android-target-sdk="36"
 kotlinBundledByAgp = "2.2.10"
 ksp = "2.3.11"
 coreKtx = "1.19.0"
