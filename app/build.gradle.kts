@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.VariantDimension
 import java.util.Properties
 import kotlin.apply
 
@@ -48,7 +49,6 @@ android {
         }
     }
 
-
     buildFeatures {
         buildConfig = true
         compose = true
@@ -58,15 +58,13 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             isDefault = true
-            buildConfigField(
-                "String",
+            escapedBuildConfigField(
                 EnvKeys.ENCRYPTION_PASSPHRASE,
-                "\"${System.getenv(EnvKeys.ENCRYPTION_PASSPHRASE) ?: ""}\"",
+                envVariableOrDefault(EnvKeys.ENCRYPTION_PASSPHRASE),
             )
-            buildConfigField(
-                "String",
+            escapedBuildConfigField(
                 EnvKeys.SENTRY_DSN,
-                "\"${System.getenv(EnvKeys.SENTRY_DSN) ?: ""}\"",
+                envVariableOrDefault(EnvKeys.SENTRY_DSN),
             )
         }
         release {
@@ -80,15 +78,13 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
-            buildConfigField(
-                "String",
+            escapedBuildConfigField(
                 EnvKeys.ENCRYPTION_PASSPHRASE,
-                "\"${requireEnvVariable(EnvKeys.ENCRYPTION_PASSPHRASE)}\"",
+                requireEnvVariable(EnvKeys.ENCRYPTION_PASSPHRASE),
             )
-            buildConfigField(
-                "String",
+            escapedBuildConfigField(
                 EnvKeys.SENTRY_DSN,
-                "\"${requireEnvVariable(EnvKeys.SENTRY_DSN)}\"",
+                requireEnvVariable(EnvKeys.SENTRY_DSN),
             )
         }
     }
@@ -165,6 +161,14 @@ private object EnvKeys {
     const val SENTRY_ORG = "SENTRY_ORG"
     const val SENTRY_PROJECT = "SENTRY_PROJECT"
     const val SENTRY_AUTH_TOKEN = "SENTRY_AUTH_TOKEN"
+}
+
+private fun VariantDimension.escapedBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
+}
+
+private fun envVariableOrDefault(key: String): String {
+    return System.getenv(key) ?: ""
 }
 
 private fun requireEnvVariable(key: String): String {
