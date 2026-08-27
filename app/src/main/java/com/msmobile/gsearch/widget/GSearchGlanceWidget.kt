@@ -8,7 +8,6 @@ package com.msmobile.gsearch.widget
 //    day/night pair can carry a runtime alpha and a night variant; the unit one takes a
 //    single colour or a resource id and can do neither.
 import android.content.Context
-import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -59,7 +58,7 @@ class GSearchGlanceWidget : GlanceAppWidget() {
             GSearchBar(
                 actions = actions,
                 opacity = opacityPercent / 100f,
-                backgroundAction = WidgetConfig.backgroundActionIn(actions),
+                barAction = WidgetConfig.backgroundActionIn(actions),
             )
         }
     }

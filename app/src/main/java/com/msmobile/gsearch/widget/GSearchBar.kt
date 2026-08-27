@@ -25,6 +25,7 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import com.msmobile.gsearch.R
+import com.msmobile.gsearch.utils.PreviewPhone
 
 // Declared sizes, matching res/values/widget_dimens.xml — see that file for why they are
 // larger than the size they render at on One UI. Glance takes dp in code rather than from
@@ -38,7 +39,22 @@ private val BAR_PADDING = 10.dp
 fun GSearchBar(
     actions: List<WidgetAction>,
     opacity: Float,
-    backgroundAction: WidgetAction,
+    barAction: WidgetAction,
+) {
+    GSearchBarContent(
+        actions = actions,
+        opacity = opacity,
+        onBarClicked = { context ->
+            actionStartActivity(WidgetActionActivity.intentFor(context, barAction))
+        },
+    )
+}
+
+@Composable
+fun GSearchBarContent(
+    actions: List<WidgetAction>,
+    opacity: Float,
+    onBarClicked: (Context) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -52,9 +68,9 @@ fun GSearchBar(
                 .height(BAR_HEIGHT)
                 .then(pillBackground(context, opacity))
                 // Tapping the gap between icons searches, as on the stock bar.
-                .clickable(
-                    actionStartActivity(WidgetActionActivity.intentFor(context, backgroundAction)),
-                ),
+                .clickable {
+                    onBarClicked(context)
+                },
             contentAlignment = Alignment.Center,
         ) {
             Row(
@@ -121,3 +137,13 @@ private fun pillColor(context: Context, opacity: Float) = ColorProvider(
     day = Color(ContextCompat.getColor(context, R.color.widget_pill_day)).copy(alpha = opacity),
     night = Color(ContextCompat.getColor(context, R.color.widget_pill_night)).copy(alpha = opacity),
 )
+
+@PreviewPhone
+@Composable
+fun GSearchBarPreview() {
+    GSearchBarContent(
+        actions = WidgetAction.entries,
+        opacity = 0.5f,
+        onBarClicked = {},
+    )
+}
