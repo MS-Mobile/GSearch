@@ -1,0 +1,61 @@
+name: Tech Debt
+description: Track a code smell, anti-pattern, or other technical debt in GSearch
+title: "[Tech Debt]: "
+labels: ["tech-debt"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to track technical debt: code smells, anti-patterns, missing tooling, or risky shortcuts.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is the debt? Describe the current state of the code.
+      placeholder: |
+        Example: The dirty-check in VisitDetailViewModel compares summed hashCodes of editable fields.
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: File and line references where the debt lives.
+      placeholder: |
+        Example: app/src/main/java/com/msmobile/gsearch/visit/VisitDetailViewModel.kt:1229-1246
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Why does this matter? Describe the concrete consequence (bug risk, data loss, untestability, security), not a style preference.
+      placeholder: |
+        Example: Hash collisions can skip the discard-changes confirmation, silently losing user edits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Fix
+      description: Direction for the fix. The full design happens when the issue is picked up.
+      placeholder: |
+        Example: Snapshot the editable fields into a data class on load and compare with structural equality.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort
+      description: "S = under an hour, M = a focused session, L = multi-session refactor."
+      options:
+        - S
+        - M
+        - L
+    validations:
+      required: true

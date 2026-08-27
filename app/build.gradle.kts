@@ -1,3 +1,7 @@
+import com.android.build.api.dsl.VariantDimension
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     // AGP 9 has built-in Kotlin support: it registers the `kotlin` extension itself, so
@@ -6,6 +10,7 @@ plugins {
     // applies cleanly on top of built-in Kotlin. Its version must track AGP's Kotlin.
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.compose.screenshot)
 }
 
 detekt {
@@ -20,30 +25,71 @@ detekt {
 android {
     namespace = "com.msmobile.gsearch"
     compileSdk {
-        version = release(37)
+        version = release(libs.versions.android.compile.sdk.get().toInt())
     }
 
     defaultConfig {
         applicationId = "com.msmobile.gsearch"
-        minSdk = 24
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = libs.versions.android.min.sdk.get().toInt()
+        targetSdk = libs.versions.android.target.sdk.get().toInt()
+        versionCode = System.getenv(EnvKeys.VERSION_CODE)?.toIntOrNull() ?: 1
+        versionName = requireVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreFile = System.getenv(EnvKeys.KEYSTORE_FILE)
+            if (keystoreFile != null) {
+                storeFile = file(keystoreFile)
+                storePassword = System.getenv(EnvKeys.KEYSTORE_PASSWORD)
+                keyAlias = System.getenv(EnvKeys.KEYSTORE_ALIAS)
+                keyPassword = System.getenv(EnvKeys.KEYSTORE_PASSWORD)
+            }
+        }
+    }
+
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            isDefault = true
+            escapedBuildConfigField(
+                EnvKeys.ENCRYPTION_PASSPHRASE,
+                envVariableOrDefault(EnvKeys.ENCRYPTION_PASSPHRASE),
+            )
+            escapedBuildConfigField(
+                EnvKeys.SENTRY_DSN,
+                envVariableOrDefault(EnvKeys.SENTRY_DSN),
+            )
+        }
         release {
             optimization {
                 enable = false
             }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
+            escapedBuildConfigField(
+                EnvKeys.ENCRYPTION_PASSPHRASE,
+                requireEnvVariable(EnvKeys.ENCRYPTION_PASSPHRASE),
+            )
+            escapedBuildConfigField(
+                EnvKeys.SENTRY_DSN,
+                requireEnvVariable(EnvKeys.SENTRY_DSN),
+            )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -74,6 +120,17 @@ android {
         informational += "GradleDependency"
         informational += "NewerVersionAvailable"
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    // Still gated behind an experimental flag by AGP 9.3, even though the screenshot plugin
+    // is applied above; without it the `screenshotTest` source set is never created and the
+    // tests below compile into nothing.
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 kotlin {
@@ -98,4 +155,50 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    // The rendering side (layoutlib, the preview harness) is pulled in by the plugin; these
+    // two are what the test sources themselves compile against — the @PreviewTest annotation
+    // and the @Preview/@PreviewParameter ones the previews under src/main are written with.
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
+}
+
+private object EnvKeys {
+    const val VERSION_CODE = "VERSION_CODE"
+    const val KEYSTORE_FILE = "KEYSTORE_FILE"
+    const val KEYSTORE_PASSWORD = "KEYSTORE_PASSWORD"
+    const val KEYSTORE_ALIAS = "KEYSTORE_ALIAS"
+    const val ENCRYPTION_PASSPHRASE = "ENCRYPTION_PASSPHRASE"
+    const val SENTRY_DSN = "SENTRY_DSN"
+    const val SENTRY_ORG = "SENTRY_ORG"
+    const val SENTRY_PROJECT = "SENTRY_PROJECT"
+    const val SENTRY_AUTH_TOKEN = "SENTRY_AUTH_TOKEN"
+}
+
+private fun VariantDimension.escapedBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
+}
+
+private fun envVariableOrDefault(key: String): String {
+    return System.getenv(key) ?: ""
+}
+
+private fun requireEnvVariable(key: String): String {
+    return System.getenv(key) ?: error("$key environment variable is required for release builds")
+}
+
+private fun requireVersionName(): String {
+    val versionPropsFile = file("${rootProject.projectDir}/version.properties")
+
+    if (!versionPropsFile.exists()) {
+        error("version.properties file not found at ${versionPropsFile.absolutePath}")
+    }
+
+    val versionProps = Properties().apply {
+        versionPropsFile.inputStream().use { load(it) }
+    }
+    val versionName = versionProps.getProperty("versionName")
+        ?: error("versionName property not found in version.properties")
+
+    return versionName
 }
