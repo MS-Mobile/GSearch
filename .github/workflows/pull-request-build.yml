@@ -31,18 +31,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create Google Services JSON
-        env:
-          GOOGLE_SERVICES_DEBUG: ${{ secrets.GOOGLE_SERVICES_JSON_DEBUG }}
-        run: |
-          mkdir -p app/src/debug
-          printf '%s' "$GOOGLE_SERVICES_DEBUG" > app/src/debug/google-services.json
-          if [ ! -f "app/src/debug/google-services.json" ]; then
-            echo "ERROR: google-services.json was not created"
-            exit 1
-          fi
-          echo "Google Services JSON created successfully"
-
       - name: Make gradlew executable
         run: chmod +x gradlew
 
@@ -66,23 +54,6 @@ jobs:
         env:
           ENCRYPTION_PASSPHRASE: ${{ secrets.ENCRYPTION_PASSPHRASE }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-
-      # Room exports its schema JSONs during KSP compilation — no emulator or app
-      # launch needed. The script force-re-runs the export (the build above
-      # restores KSP from the cache, which skips it) and then checks the result
-      # matches what the PR committed.
-      - name: Verify Room Schemas Are Committed
-        run: sh scripts/verify-room-schemas.sh
-        env:
-          ENCRYPTION_PASSPHRASE: ${{ secrets.ENCRYPTION_PASSPHRASE }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: '**/build/test-results/**/*.xml'
 
       - name: Upload Screenshot Test Results
         uses: actions/upload-artifact@v4

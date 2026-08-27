@@ -35,17 +35,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Create Google Services JSON
-        env:
-          GOOGLE_SERVICES_DEBUG: ${{ secrets.GOOGLE_SERVICES_JSON_DEBUG }}
-        run: |
-          mkdir -p app/src/debug
-          printf '%s' "$GOOGLE_SERVICES_DEBUG" > app/src/debug/google-services.json
-          if [ ! -f "app/src/debug/google-services.json" ]; then
-            echo "ERROR: google-services.json was not created"
-            exit 1
-          fi
-
       - name: Make gradlew executable
         run: chmod +x gradlew
 
