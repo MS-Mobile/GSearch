@@ -3,11 +3,12 @@ package com.msmobile.gsearch.config
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.android.tools.screenshot.PreviewTest
+import com.msmobile.gsearch.utils.PreviewPhone
 
 /**
  * Pins every state in [ConfigPreviewConfigProvider] to a reference image.
  *
- * [PreviewPhone] is repeated here rather than inherited from [ConfigScreenPreview]: the
+ * [com.msmobile.gsearch.utils.PreviewPhone] is repeated here rather than inherited from [ConfigScreenPreview]: the
  * plugin discovers previews by the `@Preview` annotations on the function it is about to
  * render, and this wrapper is that function — without one it is not a preview at all and
  * the test silently contributes no images.

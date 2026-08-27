@@ -54,6 +54,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.msmobile.gsearch.R
+import com.msmobile.gsearch.utils.PreviewPhone
 import com.msmobile.gsearch.widget.WidgetAction
 import com.msmobile.gsearch.widget.WidgetConfig
 import kotlin.math.roundToInt

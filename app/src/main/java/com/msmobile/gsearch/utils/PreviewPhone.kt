@@ -1,4 +1,4 @@
-package com.msmobile.gsearch.config
+package com.msmobile.gsearch.utils
 
 import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
@@ -6,7 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 /**
  * The device and colour scheme every screenshot-tested preview is pinned to.
  *
- * Both `uiMode` variants are listed because [GSearchTheme] picks its colour scheme from
+ * Both `uiMode` variants are listed because [com.msmobile.gsearch.config.GSearchTheme] picks its colour scheme from
  * `isSystemInDarkTheme()`, so light and dark are genuinely different renderings rather than
  * the same tree in different colours — and the config screen is the one place the widget's
  * fixed palette meets Material's theming, which is where a dark-mode regression would show.
