@@ -1,5 +1,6 @@
 package com.msmobile.gsearch.config
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.msmobile.gsearch.R
@@ -340,5 +342,36 @@ private fun ActionList(
                 }
             }
         }
+    }
+}
+
+/**
+ * Renders [ConfigScreen] for the previews and, through [ConfigScreenshotTest], for the
+ * screenshot gate.
+ *
+ * Wrapped in [GSearchTheme] rather than left bare so the preview resolves the same colour
+ * scheme [ConfigActivity] does; without it the Material colours fall back to defaults and
+ * the reference images would stop matching what ships.
+ *
+ * The callbacks are all no-ops. Nothing here is interacted with — the screen is composed
+ * once and drawn — and the real ones write to SharedPreferences and poke the widget host,
+ * neither of which exists in a preview.
+ */
+@VisibleForTesting
+@PreviewPhone
+@Composable
+internal fun ConfigScreenPreview(
+    @PreviewParameter(ConfigPreviewConfigProvider::class) config: ConfigPreviewConfig,
+) {
+    GSearchTheme {
+        ConfigScreen(
+            initialActions = config.actions,
+            initialOpacity = config.opacityPercent,
+            canPinWidget = config.canPinWidget,
+            onActionsChange = {},
+            onOpacityChange = {},
+            onAddToHomeScreen = {},
+            onDone = {},
+        )
     }
 }

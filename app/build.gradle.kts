@@ -10,6 +10,7 @@ plugins {
     // applies cleanly on top of built-in Kotlin. Its version must track AGP's Kotlin.
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.compose.screenshot)
 }
 
 detekt {
@@ -125,6 +126,11 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Still gated behind an experimental flag by AGP 9.3, even though the screenshot plugin
+    // is applied above; without it the `screenshotTest` source set is never created and the
+    // tests below compile into nothing.
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 kotlin {
@@ -149,6 +155,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+
+    // The rendering side (layoutlib, the preview harness) is pulled in by the plugin; these
+    // two are what the test sources themselves compile against — the @PreviewTest annotation
+    // and the @Preview/@PreviewParameter ones the previews under src/main are written with.
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
 }
 
 private object EnvKeys {

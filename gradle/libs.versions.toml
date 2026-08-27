@@ -17,6 +17,10 @@ activityCompose = "1.13.0"
 # 1.1.1 is the newest stable; 1.2.0 has only reached rc01.
 glance = "1.2.0"
 
+# The AGP screenshot-test plugin, and the assertion API the tests it generates link
+# against. They ship as a pair off the same alpha train, so both move together.
+composeScreenshot = "0.0.1-alpha16"
+
 # Static analysis. Spotless only drives ktlint — the ktlint version below is what actually
 # formats, and Spotless downloads it itself rather than bundling one.
 spotless = "8.10.0"
@@ -52,6 +56,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "composeScreenshot" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -65,4 +70,8 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinBundledByAgp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
+# Adds the `screenshotTest` source set and the update/validate tasks. Kept behind the
+# android.experimental.enableScreenshotTest flag in app/build.gradle.kts, which AGP still
+# requires while the plugin is an alpha.
+compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "composeScreenshot" }
 
