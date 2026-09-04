@@ -7,7 +7,8 @@ plugins {
     // AGP 9 has built-in Kotlin support: it registers the `kotlin` extension itself, so
     // applying org.jetbrains.kotlin.android on top fails with a duplicate-extension error.
     // The Compose compiler plugin is the exception — it adds no `kotlin` extension, so it
-    // applies cleanly on top of built-in Kotlin. Its version must track AGP's Kotlin.
+    // applies cleanly on top of built-in Kotlin. Its version must track the Kotlin the build
+    // runs on — see libs.versions.kotlin and the note on the root `kotlin.android` alias.
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
     alias(libs.plugins.compose.screenshot)
@@ -114,9 +115,8 @@ android {
         informational += "UselessParent"
 
         // "A newer version is available" must never fail a build: it turns an unrelated
-        // upstream release into a red CI run with no code change behind it. NewerVersionAvailable
-        // would also fight the deliberate pin of kotlinBundledByAgp to AGP's own Kotlin, where
-        // taking the newer version is exactly the wrong move. Both stay in the report.
+        // upstream release into a red CI run with no code change behind it. Both stay in the
+        // report.
         informational += "GradleDependency"
         informational += "NewerVersionAvailable"
     }
