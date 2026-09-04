@@ -3,7 +3,12 @@ agp = "9.4.0"
 android-compile-sdk="37"
 android-min-sdk="26"
 android-target-sdk="37"
-kotlinBundledByAgp = "2.4.10"
+# The Kotlin the whole build runs on. AGP 9 ships its own — 9.4.0 bundles 2.2.10 — but the
+# root build script declares org.jetbrains.kotlin.android at this version with `apply false`,
+# which puts the Kotlin Gradle plugin on the buildscript classpath, where the higher version
+# wins. Built-in Kotlin then runs on it. Verify with `./gradlew buildEnvironment`: the line
+# reads `kotlin-gradle-plugin:2.2.10 -> 2.4.10`.
+kotlin = "2.4.10"
 ksp = "2.3.11"
 coreKtx = "1.19.0"
 junit = "4.13.2"
@@ -60,14 +65,19 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-# No kotlin-android alias: AGP 9 supplies the Kotlin plugin and its version itself.
-# Applying org.jetbrains.kotlin.android on top fails with a duplicate `kotlin` extension.
+# Declared `apply false` at the root and applied by no module. Not dead: declaring it is what
+# raises built-in Kotlin from AGP's 2.2.10 to the version above. Actually applying it is still
+# impossible — it registers a second `kotlin` extension and configuration fails.
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 # Declared for later use; not applied — nothing here does annotation processing.
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 # Unlike org.jetbrains.kotlin.android, this one coexists with built-in Kotlin: it only
 # registers a compiler plugin and a `composeCompiler` extension, never a `kotlin` one.
-# AGP refuses to configure with buildFeatures.compose = true unless it is applied.
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinBundledByAgp" }
+# AGP refuses to configure with buildFeatures.compose = true unless it is applied. Its version
+# must equal the Kotlin above: at >= 2.3 AGP registers produceReleaseComposeMapping, which
+# resolves org.jetbrains.kotlin:compose-group-mapping at the Kotlin version actually in use —
+# and that artifact was first published for 2.3.0. Mismatch fails minified release builds only.
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 # Adds the `screenshotTest` source set and the update/validate tasks. Kept behind the
