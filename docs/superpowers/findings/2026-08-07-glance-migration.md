@@ -12,13 +12,27 @@ exception: `org.jetbrains.kotlin.plugin.compose` registers only a compiler plugi
 `composeCompiler` extension, so it applies cleanly alongside built-in Kotlin. AGP refuses to
 configure with `buildFeatures.compose = true` unless it is applied.
 
-Its version must equal the Kotlin version AGP bundles. That is not published anywhere
-convenient — read it from AGP's own POM:
+Its version must equal the Kotlin version the build actually runs on. Which Kotlin AGP bundles
+is not published anywhere convenient — read it from AGP's own POM:
 
-    https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.3.1/gradle-9.3.1.pom
+    https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/9.4.0/gradle-9.4.0.pom
 
-AGP 9.3.1 depends on `kotlin-gradle-plugin` 2.2.10, so `kotlinBundledByAgp = "2.2.10"`.
-Bumping `agp` means re-reading that POM.
+AGP 9.3.1 through 9.5.0-alpha04 all depend on `kotlin-gradle-plugin` 2.2.10.
+
+**Amended 2026-09-04.** That bundled version is a default, not a ceiling. Declaring
+`org.jetbrains.kotlin.android` in the root `plugins {}` block with `apply false` puts the Kotlin
+Gradle plugin on the buildscript classpath, where the higher version wins over AGP's —
+`./gradlew buildEnvironment` reads `kotlin-gradle-plugin:2.2.10 -> 2.4.10` — and built-in Kotlin
+runs on it. `apply false` is what keeps this legal; actually applying the plugin still fails with
+the duplicate `kotlin` extension. The catalog now has one `kotlin` version driving both that
+declaration and the Compose compiler plugin, replacing `kotlinBundledByAgp`.
+
+Getting this wrong does not fail compilation. With the Compose plugin at 2.4.10 and built-in
+Kotlin left at 2.2.10, KGP aligns the compiler plugin back down to 2.2.10 and everything builds —
+but AGP sees a >= 2.3 Compose plugin, registers `produceReleaseComposeMapping`, and resolves
+`org.jetbrains.kotlin:compose-group-mapping:2.2.10`, which was never published (Maven Central
+starts at 2.3.0-Beta1). Only minified release builds run that task, so it surfaces in the release
+workflow and nowhere else.
 
 ## The migration itself was free
 
