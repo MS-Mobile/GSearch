@@ -2,29 +2,19 @@ package com.msmobile.gsearch.widget
 
 import android.content.Context
 import android.os.Build
+import androidx.annotation.ColorRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.glance.GlanceModifier
-import androidx.glance.Image
-import androidx.glance.ImageProvider
-import androidx.glance.LocalContext
-import androidx.glance.action.clickable
+import androidx.glance.action.Action
 import androidx.glance.appwidget.action.actionStartActivity
-import androidx.glance.appwidget.cornerRadius
-import androidx.glance.background
-import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
-import androidx.glance.layout.Row
-import androidx.glance.layout.fillMaxHeight
-import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
-import androidx.glance.layout.height
-import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import com.msmobile.gsearch.R
+import com.msmobile.gsearch.config.GSearchBarPreviewConfig
+import com.msmobile.gsearch.config.GSearchBarPreviewConfigProvider
 import com.msmobile.gsearch.utils.PreviewPhone
 
 // Declared sizes, matching res/values/widget_dimens.xml — see that file for why they are
@@ -50,53 +40,50 @@ fun GSearchBar(
     )
 }
 
+/**
+ * Built from the `PreviewCompat` elements rather than Glance's own so the same tree can be
+ * drawn by a Compose preview — see [PreviewCompatGlanceBox] for why Glance's cannot be.
+ */
 @Composable
-fun GSearchBarContent(
+private fun GSearchBarContent(
     actions: List<WidgetAction>,
     opacity: Float,
-    onBarClicked: (Context) -> Unit,
+    onBarClicked: (Context) -> Action,
 ) {
-    val context = LocalContext.current
+    val context = PreviewCompatGlanceContext.current
 
-    Box(
-        modifier = GlanceModifier.fillMaxSize(),
+    PreviewCompatGlanceBox(
+        modifier = PreviewCompatGlanceModifier
+            .fillMaxWidth()
+            .height(BAR_HEIGHT)
+            .then(pillBackground(context, opacity))
+            // Tapping the gap between icons searches, as on the stock bar.
+            .clickable { onBarClicked(context) },
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .height(BAR_HEIGHT)
-                .then(pillBackground(context, opacity))
-                // Tapping the gap between icons searches, as on the stock bar.
-                .clickable {
-                    onBarClicked(context)
-                },
-            contentAlignment = Alignment.Center,
+        PreviewCompatGlanceRow(
+            modifier = PreviewCompatGlanceModifier
+                .fillMaxSize()
+                .padding(horizontal = BAR_PADDING),
+            verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
-            Row(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .padding(horizontal = BAR_PADDING),
-                verticalAlignment = Alignment.Vertical.CenterVertically,
-            ) {
-                actions.forEach { action ->
-                    Box(
-                        modifier = GlanceModifier
-                            .defaultWeight()
-                            .fillMaxHeight()
-                            .clickable(
-                                actionStartActivity(
-                                    WidgetActionActivity.intentFor(context, action),
-                                ),
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Image(
-                            provider = ImageProvider(action.iconRes),
-                            contentDescription = context.getString(action.labelRes),
-                            modifier = GlanceModifier.size(GLYPH_SIZE),
-                        )
-                    }
+            actions.forEach { action ->
+                PreviewCompatGlanceBox(
+                    modifier = PreviewCompatGlanceModifier
+                        .defaultWeight()
+                        .fillMaxHeight()
+                        .clickable {
+                            actionStartActivity(
+                                WidgetActionActivity.intentFor(context, action),
+                            )
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    PreviewCompatGlanceImage(
+                        resId = action.iconRes,
+                        contentDescription = context.getString(action.labelRes),
+                        modifier = PreviewCompatGlanceModifier.size(GLYPH_SIZE),
+                    )
                 }
             }
         }
@@ -123,27 +110,38 @@ fun GSearchBarContent(
  * Both colour variants are supplied rather than one resolved colour, because the widget is
  * drawn in the launcher's process and it is the launcher's dark-mode state that decides.
  */
-@Composable
-private fun pillBackground(context: Context, opacity: Float): GlanceModifier =
+private fun pillBackground(context: Context, opacity: Float): PreviewCompatGlanceModifier =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        GlanceModifier
-            .background(pillColor(context, opacity))
+        PreviewCompatGlanceModifier
+            .background(
+                day = pillColor(context, R.color.widget_pill_day, opacity),
+                night = pillColor(context, R.color.widget_pill_night, opacity),
+            )
             .cornerRadius(BAR_HEIGHT / 2)
     } else {
-        GlanceModifier.background(ImageProvider(R.drawable.widget_pill_background))
+        PreviewCompatGlanceModifier.background(R.drawable.widget_pill_background)
     }
 
-private fun pillColor(context: Context, opacity: Float) = ColorProvider(
-    day = Color(ContextCompat.getColor(context, R.color.widget_pill_day)).copy(alpha = opacity),
-    night = Color(ContextCompat.getColor(context, R.color.widget_pill_night)).copy(alpha = opacity),
-)
+private fun pillColor(context: Context, @ColorRes colorRes: Int, opacity: Float) =
+    Color(ContextCompat.getColor(context, colorRes)).copy(alpha = opacity)
 
+/**
+ * The bar as the launcher draws it.
+ *
+ * Goes through [GSearchBar] rather than straight to [GSearchBarContent] so the preview
+ * covers the real entry point, action wiring included. Building those actions is deferred
+ * by [PreviewCompatGlanceModifier.clickable] and so never happens here, which is what lets
+ * a preview compose a tree whose clicks address a widget host that is not present.
+ */
+@VisibleForTesting
 @PreviewPhone
 @Composable
-fun GSearchBarPreview() {
-    GSearchBarContent(
-        actions = WidgetAction.entries,
-        opacity = 0.5f,
-        onBarClicked = {},
+internal fun GSearchBarPreview(
+    @PreviewParameter(GSearchBarPreviewConfigProvider::class) config: GSearchBarPreviewConfig,
+) {
+    GSearchBar(
+        actions = config.actions,
+        opacity = config.opacity,
+        barAction = WidgetConfig.backgroundActionIn(config.actions),
     )
 }
