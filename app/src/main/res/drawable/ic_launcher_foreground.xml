@@ -2,8 +2,12 @@
 <!--
   GS monogram, Space Grotesk 700 outlines converted to paths (no font dependency at runtime).
   Glyph coordinates are the design's literal layout on the 108dp canvas; the group re-centres
-  that art on the canvas and scales it to 0.88 so the ink sits inside the 66dp safe circle,
-  which the design's own layout overflowed by 3.6dp and sat 7.5dp above centre.
+  that art on the canvas and scales it, because the design's own layout sat 7.5dp above centre
+  and overflowed the circular mask by 3.6dp.
+
+  Scale is 0.72: the mark is 50dp wide, 70% of the 72dp window a launcher
+  actually shows. The design's literal size measured 85% on a device, which crowded the circle
+  mask; Material's keyline for a wide mark is 75%.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -13,8 +17,8 @@
     <group
         android:pivotX="55"
         android:pivotY="46.5"
-        android:scaleX="0.88"
-        android:scaleY="0.88"
+        android:scaleX="0.72"
+        android:scaleY="0.72"
         android:translateX="-1"
         android:translateY="7.5">
         <path
