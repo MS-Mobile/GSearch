@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.VariantDimension
+import com.project.starter.easylauncher.filter.ColorRibbonFilter
 import java.util.Properties
 import kotlin.apply
 
@@ -12,6 +13,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.detekt)
     alias(libs.plugins.compose.screenshot)
+    alias(libs.plugins.easylauncher)
 }
 
 detekt {
@@ -37,6 +39,10 @@ android {
         versionName = requireVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     signingConfigs {
@@ -136,6 +142,23 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+}
+
+easylauncher {
+    buildTypes {
+        create("debug") {
+            filters(
+                customRibbon(
+                    gravity = ColorRibbonFilter.Gravity.BOTTOM,
+                    label = "DEV"
+                )
+            )
+
+        }
+        create("release") {
+            enable(false)
+        }
     }
 }
 
