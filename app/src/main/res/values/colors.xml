@@ -7,4 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!--
+      Brand marks. The gradient is the blue -> purple -> terracotta wash the config screen
+      paints behind the widget preview; the monogram pair is the M3 purple ramp. Used by the
+      adaptive launcher icon and the Play feature graphic, so icon and store listing match.
+    -->
+    <color name="brand_gradient_start">#3B5BA9</color>
+    <color name="brand_gradient_mid">#7C4DA8</color>
+    <color name="brand_gradient_end">#C0553C</color>
+    <color name="brand_monogram_g">#381E72</color>
+    <color name="brand_monogram_s">#A98FE0</color>
 </resources>
