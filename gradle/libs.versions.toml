@@ -41,6 +41,7 @@ composeRules = "0.6.4"
 # the whole daemon. 2.x (group dev.detekt) is built on the Kotlin 2 analysis API and runs
 # clean here. Move to 2.0.0 final when it ships; do not "fix" this by reverting to 1.23.8.
 detekt = "2.0.0-alpha.6"
+easylauncher = "6.4.1"
 
 [libraries]
 # Not a dependency of the app — Spotless loads this as a ktlint custom ruleset, and the
@@ -84,4 +85,5 @@ detekt = { id = "dev.detekt", version.ref = "detekt" }
 # android.experimental.enableScreenshotTest flag in app/build.gradle.kts, which AGP still
 # requires while the plugin is an alpha.
 compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "composeScreenshot" }
+easylauncher = { id = "com.starter.easylauncher", version.ref = "easylauncher" }
 
