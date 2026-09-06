@@ -14,7 +14,6 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import com.msmobile.gsearch.widget.GSearchWidgetProvider
-import com.msmobile.gsearch.widget.WidgetAction
 import com.msmobile.gsearch.widget.WidgetConfig
 import com.msmobile.gsearch.widget.WidgetRefresh
 
@@ -52,11 +51,12 @@ class ConfigActivity : ComponentActivity() {
         setContent {
             GSearchTheme {
                 ConfigScreen(
+                    initialOrder = WidgetConfig.displayOrder(this),
                     initialActions = WidgetConfig.actions(this),
                     initialOpacity = WidgetConfig.opacityPercent(this),
                     canPinWidget = canPinWidget(),
-                    onActionsChange = { actions ->
-                        WidgetConfig.setActions(this, actions)
+                    onArrangementChange = { order, actions ->
+                        WidgetConfig.setArrangement(this, order, actions)
                         WidgetRefresh.request(this)
                     },
                     onOpacityChange = { percent ->
@@ -104,14 +104,3 @@ fun GSearchTheme(content: @Composable () -> Unit) {
         content = content,
     )
 }
-
-/**
- * The order the settings list shows: everything the user has enabled, in their order,
- * followed by whatever is left in declaration order.
- *
- * Only the enabled actions are persisted, so a disabled action has no stored position to
- * restore. Appending the remainder keeps the list stable across a disable/enable round
- * trip instead of having rows jump to the top when switched back on.
- */
-fun displayOrder(enabled: List<WidgetAction>): List<WidgetAction> =
-    enabled + WidgetAction.entries.filter { it !in enabled }
