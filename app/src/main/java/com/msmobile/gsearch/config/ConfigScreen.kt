@@ -70,10 +70,11 @@ private val PREVIEW_GLYPH_SIZE = 25.dp
  */
 @Composable
 fun ConfigScreen(
+    initialOrder: List<WidgetAction>,
     initialActions: List<WidgetAction>,
     initialOpacity: Int,
     canPinWidget: Boolean,
-    onActionsChange: (List<WidgetAction>) -> Unit,
+    onArrangementChange: (order: List<WidgetAction>, enabled: List<WidgetAction>) -> Unit,
     onOpacityChange: (Int) -> Unit,
     onAddToHomeScreen: () -> Unit,
     onDone: () -> Unit,
@@ -83,7 +84,7 @@ fun ConfigScreen(
     // row keeps its place when switched off instead of jumping to the end of the list.
     val order =
         remember {
-            mutableStateListOf<WidgetAction>().apply { addAll(displayOrder(initialActions)) }
+            mutableStateListOf<WidgetAction>().apply { addAll(initialOrder) }
         }
     val enabled = remember {
         mutableStateMapOf<WidgetAction, Boolean>().apply {
@@ -93,6 +94,10 @@ fun ConfigScreen(
     var opacity by remember { mutableFloatStateOf(initialOpacity.toFloat()) }
 
     fun enabledInOrder() = order.filter { enabled[it] == true }
+
+    // The whole arrangement is saved on every edit, not just the enabled half, so that a
+    // drag of a switched-off row — which leaves the enabled list untouched — still sticks.
+    fun saveArrangement() = onArrangementChange(order.toList(), enabledInOrder())
 
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -126,13 +131,13 @@ fun ConfigScreen(
                 isEnabled = { enabled[it] == true },
                 onToggle = { action, on ->
                     enabled[action] = on
-                    onActionsChange(enabledInOrder())
+                    saveArrangement()
                 },
                 canDisable = { enabledInOrder().size > 1 },
                 canEnable = { enabledInOrder().size < WidgetConfig.MAX_ACTIONS },
                 onMove = { from, to ->
                     order.add(to, order.removeAt(from))
-                    onActionsChange(enabledInOrder())
+                    saveArrangement()
                 },
             )
 
@@ -366,10 +371,14 @@ internal fun ConfigScreenPreview(
 ) {
     GSearchTheme {
         ConfigScreen(
+            // Derived rather than another field on the config: these renderings are about
+            // the enabled actions, and the arrangement a device would have stored is the
+            // one this produces from them anyway.
+            initialOrder = WidgetConfig.parseOrder(stored = null, enabled = config.actions),
             initialActions = config.actions,
             initialOpacity = config.opacityPercent,
             canPinWidget = config.canPinWidget,
-            onActionsChange = {},
+            onArrangementChange = { _, _ -> },
             onOpacityChange = {},
             onAddToHomeScreen = {},
             onDone = {},

@@ -13,6 +13,15 @@ complexity:
   LongParameterList:
     # Composables take one parameter per piece of hoisted state plus one callback each.
     ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    # Aimed at WidgetConfig, which owns one SharedPreferences file end to end. Each stored
+    # value needs a reader and a writer, and the two list-valued ones need a parse/serialise
+    # pair as well — those are shared with the widget's Glance state and pinned by tests, so
+    # they cannot be private helpers. Splitting the object to get under the default would
+    # put two writers on one preferences file, which is the worse design. Set to the current
+    # count rather than left with headroom, so the next addition raises the question again.
+    ignorePrivate: true
+    allowedFunctionsPerObject: 12
 
 naming:
   FunctionNaming:
