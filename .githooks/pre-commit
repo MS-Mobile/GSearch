@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+#
+# Keep docs/screenshots/ (the README gallery) in sync with the Compose
+# screenshot-test reference renders. Runs only when the staged changes touch the
+# reference images, then re-stages the regenerated gallery so the synced images
+# land in the same commit.
+#
+# Enable this hook once per clone with:
+#   git config core.hooksPath .githooks
+
+set -eu
+
+REF_PREFIX="app/src/screenshotTestDebug/reference/"
+
+if git diff --cached --name-only --diff-filter=ACMRD | grep -q "^$REF_PREFIX"; then
+	echo "[pre-commit] Screenshot references changed — syncing docs/screenshots…"
+	sh scripts/sync-readme-screenshots.sh
+	git add docs/screenshots
+fi
