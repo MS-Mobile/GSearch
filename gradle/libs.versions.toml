@@ -28,7 +28,7 @@ composeScreenshot = "0.0.1-alpha16"
 
 # Static analysis. Spotless only drives ktlint — the ktlint version below is what actually
 # formats, and Spotless downloads it itself rather than bundling one.
-spotless = "8.10.0"
+spotless = "8.10.1"
 ktlint = "1.8.0"
 # The compose-rules ruleset, wired through ktlint (see the note on the library below).
 composeRules = "0.6.4"
