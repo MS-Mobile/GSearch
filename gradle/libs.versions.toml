@@ -31,7 +31,7 @@ composeScreenshot = "0.0.1-alpha16"
 spotless = "8.10.1"
 ktlint = "1.8.0"
 # The compose-rules ruleset, wired through ktlint (see the note on the library below).
-composeRules = "0.6.4"
+composeRules = "0.6.6"
 # An alpha on purpose, and not an easy one to walk back. The 1.x line (group
 # io.gitlab.arturbosch.detekt, latest 1.23.8) embeds the Kotlin 1.9 compiler and runs
 # in-process in the Gradle daemon. This build's daemon is Java 25, which that compiler
