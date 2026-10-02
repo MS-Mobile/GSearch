@@ -33,6 +33,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import com.msmobile.gsearch.R
 import com.msmobile.gsearch.widget.PreviewCompatGlanceModifier.Op
 import androidx.compose.foundation.layout.RowScope as ComposeRowScope
 import androidx.compose.ui.Modifier as ComposeModifier
@@ -160,7 +161,14 @@ internal fun PreviewCompatGlanceModifier.toGlanceModifier(): GlanceModifier {
                 modifier.background(ColorProvider(day = op.day, night = op.night))
             is Op.BackgroundImage -> modifier.background(ImageProvider(op.resId))
             is Op.CornerRadius -> modifier.cornerRadius(op.radius)
-            is Op.Clickable -> modifier.clickable(op.action())
+            // Glance lays a full-size ripple image over every clickable element. HyperOS 4's
+            // launcher treats that overlay as the tap target, so taps never reached the
+            // element's PendingIntent. A plain pressed-state drawable there instead of a
+            // ripple lets them through (HyperOS 4 does not draw the highlight; others do).
+            is Op.Clickable -> modifier.clickable(
+                onClick = op.action(),
+                rippleOverride = R.drawable.widget_press_highlight,
+            )
         }
     }
 }
