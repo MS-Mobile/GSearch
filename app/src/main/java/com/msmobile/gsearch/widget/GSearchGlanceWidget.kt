@@ -8,6 +8,8 @@ package com.msmobile.gsearch.widget
 //    day/night pair can carry a runtime alpha and a night variant; the unit one takes a
 //    single colour or a resource id and can do neither.
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -30,12 +32,16 @@ import androidx.glance.currentState
  * the layout. The ceiling is kept anyway, because a widget still cannot grow its own cell
  * and past four icons they simply crowd.
  */
-class GSearchGlanceWidget : GlanceAppWidget() {
+class GSearchGlanceWidget(
+    /** Null builds the platform source from the context the widget is composed with. */
+    private val wallpaperColorSource: WallpaperColorSource? = null,
+) : GlanceAppWidget() {
 
     // Recompose when the user resizes, so the bar tracks the width it is actually given.
     override val sizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val wallpaper = wallpaperColorSource ?: SystemWallpaperColorSource(context)
         provideContent {
             // The configuration is mirrored into the widget's Glance state and read back
             // from there, rather than read straight out of SharedPreferences.
@@ -54,11 +60,16 @@ class GSearchGlanceWidget : GlanceAppWidget() {
             val actions = state[KEY_ACTIONS]?.let(WidgetConfig::parseActions)
                 ?: WidgetConfig.actions(context)
             val opacityPercent = state[KEY_OPACITY] ?: WidgetConfig.opacityPercent(context)
+            // Mirrored like the rest, for the same reason: a direct read is not observable,
+            // so a session already open would keep judging against the old wallpaper.
+            val wallpaperColor = state[KEY_WALLPAPER_COLOR]?.let { Color(it) }
+                ?: wallpaper.primaryColor()
 
             GSearchBar(
                 actions = actions,
                 opacity = opacityPercent / 100f,
                 barAction = WidgetConfig.backgroundActionIn(actions),
+                wallpaperColor = wallpaperColor,
             )
         }
     }
@@ -66,6 +77,7 @@ class GSearchGlanceWidget : GlanceAppWidget() {
     companion object {
         val KEY_ACTIONS = stringPreferencesKey("actions")
         val KEY_OPACITY = intPreferencesKey("opacity_percent")
+        val KEY_WALLPAPER_COLOR = intPreferencesKey("wallpaper_color")
 
         /**
          * Copies the saved configuration into every placed widget's own state.
@@ -73,15 +85,24 @@ class GSearchGlanceWidget : GlanceAppWidget() {
          * Writing the state is what triggers recomposition; [GlanceAppWidget.updateAll]
          * alone does not, since nothing it observes would have changed.
          */
-        suspend fun pushConfig(context: Context) {
+        suspend fun pushConfig(
+            context: Context,
+            wallpaperColorSource: WallpaperColorSource = SystemWallpaperColorSource(context),
+        ) {
             val actions = WidgetConfig.serialiseActions(WidgetConfig.actions(context))
             val opacity = WidgetConfig.opacityPercent(context)
+            val wallpaperColor = wallpaperColorSource.primaryColor()?.toArgb()
             GlanceAppWidgetManager(context)
                 .getGlanceIds(GSearchGlanceWidget::class.java)
                 .forEach { id ->
                     updateAppWidgetState(context, id) { state ->
                         state[KEY_ACTIONS] = actions
                         state[KEY_OPACITY] = opacity
+                        if (wallpaperColor != null) {
+                            state[KEY_WALLPAPER_COLOR] = wallpaperColor
+                        } else {
+                            state.remove(KEY_WALLPAPER_COLOR)
+                        }
                     }
                 }
         }

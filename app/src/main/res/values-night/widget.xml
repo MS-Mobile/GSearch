@@ -3,6 +3,6 @@
 
     <!-- Alias only; the hex lives unqualified in values/widget.xml. -->
     <color name="widget_pill_background">@color/widget_pill_night</color>
-    <color name="widget_icon_tint">#E8EAED</color>
+    <color name="widget_icon_tint">@color/widget_icon_light</color>
 
 </resources>

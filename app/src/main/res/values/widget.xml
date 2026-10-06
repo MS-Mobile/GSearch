@@ -15,7 +15,15 @@
     <color name="widget_pill_day">#F1F3F4</color>
     <color name="widget_pill_night">#202124</color>
     <color name="widget_pill_background">@color/widget_pill_day</color>
-    <color name="widget_icon_tint">#5F6368</color>
+    <!--
+      Same split as the pill. The widget tints its glyphs at runtime with whichever of the
+      pair reads better against the pill over the wallpaper, so it needs both at once; the
+      alias is what the drawables themselves are filled with, and is what the launcher's
+      widget picker preview and pre-tint renders still show.
+    -->
+    <color name="widget_icon_dark">#5F6368</color>
+    <color name="widget_icon_light">#E8EAED</color>
+    <color name="widget_icon_tint">@color/widget_icon_dark</color>
 
     <string name="widget_label">GSearch</string>
     <string name="widget_description">Google search bar with configurable buttons</string>

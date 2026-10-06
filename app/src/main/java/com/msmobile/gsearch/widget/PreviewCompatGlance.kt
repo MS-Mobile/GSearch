@@ -2,17 +2,22 @@ package com.msmobile.gsearch.widget
 
 import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.glance.ImageProvider
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.compose.foundation.Image as ComposeImage
 import androidx.compose.foundation.layout.Box as ComposeBox
 import androidx.compose.foundation.layout.Row as ComposeRow
 import androidx.compose.ui.Alignment as ComposeAlignment
+import androidx.compose.ui.graphics.ColorFilter as ComposeColorFilter
 import androidx.compose.ui.platform.LocalContext as ComposeLocalContext
+import androidx.glance.ColorFilter as GlanceColorFilter
 import androidx.glance.Image as GlanceImage
 import androidx.glance.LocalContext as GlanceLocalContext
 import androidx.glance.layout.Box as GlanceBox
@@ -77,8 +82,16 @@ internal object PreviewCompatGlanceImage {
         @DrawableRes resId: Int,
         contentDescription: String?,
         modifier: PreviewCompatGlanceModifier = PreviewCompatGlanceModifier,
-    ) = currentRenderer().Image(resId, contentDescription, modifier)
+        tint: DayNightColor? = null,
+    ) = currentRenderer().Image(resId, contentDescription, modifier, tint)
 }
+
+/**
+ * A colour for each launcher mode, kept as a pair for the same reason the pill's background
+ * is: the widget is drawn in the launcher's process, so it is the launcher's dark-mode state
+ * that decides which one shows. The preview resolves it itself against [isSystemInDarkTheme].
+ */
+internal data class DayNightColor(val day: Color, val night: Color)
 
 /**
  * The [Context] the enclosing composition can supply.
@@ -120,6 +133,7 @@ private interface GlanceElementRenderer {
         @DrawableRes resId: Int,
         contentDescription: String?,
         modifier: PreviewCompatGlanceModifier,
+        tint: DayNightColor?,
     )
 }
 
@@ -154,10 +168,14 @@ private object GlanceRenderer : GlanceElementRenderer {
         @DrawableRes resId: Int,
         contentDescription: String?,
         modifier: PreviewCompatGlanceModifier,
+        tint: DayNightColor?,
     ) = GlanceImage(
         provider = ImageProvider(resId),
         contentDescription = contentDescription,
         modifier = modifier.toGlanceModifier(),
+        colorFilter = tint?.let {
+            GlanceColorFilter.tint(ColorProvider(day = it.day, night = it.night))
+        },
     )
 }
 
@@ -189,18 +207,22 @@ private object ComposeRenderer : GlanceElementRenderer {
     }
 
     /**
-     * Drawn as an image rather than an `Icon`, matching [GlanceImage]: these glyphs carry
-     * their own colours and a tint would flatten them to one.
+     * Drawn as an image rather than an `Icon`, matching [GlanceImage]: an `Icon` always
+     * tints, and with no [tint] the glyph has to keep the colour its drawable was filled with.
      */
     @Composable
     override fun Image(
         @DrawableRes resId: Int,
         contentDescription: String?,
         modifier: PreviewCompatGlanceModifier,
+        tint: DayNightColor?,
     ) = ComposeImage(
         painter = painterResource(resId),
         contentDescription = contentDescription,
         modifier = modifier.toComposeModifier(),
+        colorFilter = tint
+            ?.let { if (isSystemInDarkTheme()) it.night else it.day }
+            ?.let { ComposeColorFilter.tint(it) },
     )
 }
 

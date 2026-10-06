@@ -1,6 +1,7 @@
 package com.msmobile.gsearch.config
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.msmobile.gsearch.widget.WidgetAction
 import com.msmobile.gsearch.widget.WidgetConfig
@@ -19,6 +20,7 @@ internal data class GSearchBarPreviewConfig(
     val configName: String,
     val actions: List<WidgetAction>,
     val opacity: Float,
+    val wallpaperColor: Color? = null,
 )
 
 /**
@@ -61,9 +63,20 @@ internal class GSearchBarPreviewConfigProvider :
             actions = WidgetConfig.DEFAULT_ACTIONS,
             opacity = 0f,
         ),
+        // A see-through pill over a dark wallpaper, the case that used to leave dark-grey
+        // glyphs on a dark background in light mode. Both modes should show light glyphs.
+        GSearchBarPreviewConfig(
+            configName = "Translucent Over Dark Wallpaper",
+            actions = WidgetConfig.DEFAULT_ACTIONS,
+            opacity = 0.2f,
+            wallpaperColor = DARK_WALLPAPER,
+        ),
     )
 
     override fun getDisplayName(index: Int): String = values.elementAt(index).configName
 }
+
+/** A deep blue, close to the dominant colour of the wallpaper the bug was reported on. */
+private val DARK_WALLPAPER = Color(0xFF0B2A5B)
 
 private fun Int.asOpacity(): Float = this / WidgetConfig.MAX_OPACITY_PERCENT.toFloat()
