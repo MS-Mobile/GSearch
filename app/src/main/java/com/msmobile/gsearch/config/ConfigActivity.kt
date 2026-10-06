@@ -31,6 +31,11 @@ class ConfigActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // The widget's glyph colour depends on the wallpaper, and no broadcast reaches the
+        // app when that changes. Opening the settings is the natural thing to do when the
+        // icons look wrong, so it re-renders every widget against the current wallpaper.
+        WidgetRefresh.request(this)
+
         // When the launcher starts this to configure a widget it is waiting on a result,
         // and treats anything other than RESULT_OK as "the user backed out" — which for a
         // freshly dropped widget means silently deleting it. Settled up front rather than

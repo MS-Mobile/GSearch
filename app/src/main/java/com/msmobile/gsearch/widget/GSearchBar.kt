@@ -4,7 +4,10 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.ColorRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -25,15 +28,21 @@ private val BAR_HEIGHT = 67.dp
 private val GLYPH_SIZE = 30.dp
 private val BAR_PADDING = 10.dp
 
+/**
+ * [wallpaperColor] is what the glyph colour is judged against once the pill is see-through —
+ * see [WidgetIconTint]. Null means unknown, and leaves the glyphs as they read on the pill.
+ */
 @Composable
 fun GSearchBar(
     actions: List<WidgetAction>,
     opacity: Float,
     barAction: WidgetAction,
+    wallpaperColor: Color?,
 ) {
     GSearchBarContent(
         actions = actions,
         opacity = opacity,
+        wallpaperColor = wallpaperColor,
         onBarClicked = { context ->
             actionStartActivity(WidgetActionActivity.intentFor(context, barAction))
         },
@@ -48,9 +57,11 @@ fun GSearchBar(
 private fun GSearchBarContent(
     actions: List<WidgetAction>,
     opacity: Float,
+    wallpaperColor: Color?,
     onBarClicked: (Context) -> Action,
 ) {
     val context = PreviewCompatGlanceContext.current
+    val iconTint = iconTint(context, opacity, wallpaperColor)
 
     PreviewCompatGlanceBox(
         modifier = PreviewCompatGlanceModifier
@@ -83,6 +94,7 @@ private fun GSearchBarContent(
                         resId = action.iconRes,
                         contentDescription = context.getString(action.labelRes),
                         modifier = PreviewCompatGlanceModifier.size(GLYPH_SIZE),
+                        tint = iconTint,
                     )
                 }
             }
@@ -123,7 +135,33 @@ private fun pillBackground(context: Context, opacity: Float): PreviewCompatGlanc
     }
 
 private fun pillColor(context: Context, @ColorRes colorRes: Int, opacity: Float) =
-    Color(ContextCompat.getColor(context, colorRes)).copy(alpha = opacity)
+    color(context, colorRes).copy(alpha = opacity)
+
+/**
+ * The glyph colour for each mode, judged against that mode's pill over the wallpaper.
+ *
+ * Below API 31 the pill is the opaque shape drawable whatever the setting says — see
+ * [pillBackground] — so the glyphs are judged against a solid pill there too.
+ */
+private fun iconTint(context: Context, opacity: Float, wallpaperColor: Color?): DayNightColor {
+    val effectiveOpacity = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) opacity else 1f
+    val dark = color(context, R.color.widget_icon_dark)
+    val light = color(context, R.color.widget_icon_light)
+    fun against(@ColorRes pill: Int) = WidgetIconTint.resolve(
+        pill = color(context, pill),
+        opacity = effectiveOpacity,
+        wallpaper = wallpaperColor,
+        dark = dark,
+        light = light,
+    )
+    return DayNightColor(
+        day = against(R.color.widget_pill_day),
+        night = against(R.color.widget_pill_night),
+    )
+}
+
+private fun color(context: Context, @ColorRes colorRes: Int) =
+    Color(ContextCompat.getColor(context, colorRes))
 
 /**
  * The bar as the launcher draws it.
@@ -139,9 +177,16 @@ private fun pillColor(context: Context, @ColorRes colorRes: Int, opacity: Float)
 internal fun GSearchBarPreview(
     @PreviewParameter(GSearchBarPreviewConfigProvider::class) config: GSearchBarPreviewConfig,
 ) {
-    GSearchBar(
-        actions = config.actions,
-        opacity = config.opacity,
-        barAction = WidgetConfig.backgroundActionIn(config.actions),
-    )
+    // Painted behind the bar so the image shows what the glyph colour was judged against.
+    val wallpaper = config.wallpaperColor
+        ?.let { Modifier.background(it) }
+        ?: Modifier
+    Box(modifier = wallpaper) {
+        GSearchBar(
+            actions = config.actions,
+            opacity = config.opacity,
+            barAction = WidgetConfig.backgroundActionIn(config.actions),
+            wallpaperColor = config.wallpaperColor,
+        )
+    }
 }
