@@ -33,6 +33,7 @@
     <string name="widget_action_lens">Lens</string>
     <string name="widget_action_gemini">Gemini</string>
     <string name="widget_action_guided_vision">Guided vision</string>
+    <string name="widget_action_live">Live</string>
 
     <string name="config_title">Search bar</string>
     <string name="config_buttons_heading">Buttons</string>

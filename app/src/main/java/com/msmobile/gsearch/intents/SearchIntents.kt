@@ -101,6 +101,24 @@ object SearchIntents {
         context.packageManager.resolveActivity(guidedVision().intent, 0) != null
 
     /**
+     * PROTOTYPE — voice-only Gemini Live, reached through [guidedVision].
+     *
+     * There is no intent for voice Live a third-party app may use (see [guidedVision]). But
+     * Live survives being sent to the background: it keeps running as a foreground service
+     * with its "Live with Gemini — Listening…" notification, and the camera is dropped,
+     * because Android does not let a backgrounded app keep it. So guided vision followed by
+     * a trip to the launcher ends as voice Live, minimised. The caller does the second half.
+     * Offered under the same condition as guided vision, [hasGuidedVision].
+     *
+     * Known costs: the camera is on for the length of the delay, and a first-run consent
+     * dialog in Live would be interrupted by the trip home.
+     */
+    fun liveVoice() = guidedVision()
+
+    /** The launcher, which is what pressing HOME would show. */
+    fun home(): Intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+
+    /**
      * Lens, resolved at bind time:
      *
      * 1. the standalone Lens app, when installed — a direct, single-tap camera;

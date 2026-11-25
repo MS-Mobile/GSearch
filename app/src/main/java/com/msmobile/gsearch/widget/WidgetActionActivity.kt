@@ -4,10 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
 import com.msmobile.gsearch.R
+import com.msmobile.gsearch.intents.SearchIntents
 
 /**
  * Fires a [WidgetAction]'s real intent on behalf of a widget button, then gets out of the
@@ -44,7 +47,11 @@ class WidgetActionActivity : Activity() {
         }
 
         try {
-            startActivity(action.intent(this).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            val target = action.intent(this)
+            startActivity(target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (action == WidgetAction.GEMINI_LIVE) {
+                scheduleTripHome(applicationContext)
+            }
         } catch (e: android.content.ActivityNotFoundException) {
             // Reachable in the real world: every action targets the Google app, which can
             // be disabled or missing. Silently doing nothing would look like a dead button.
@@ -57,6 +64,35 @@ class WidgetActionActivity : Activity() {
 
     companion object {
         private const val TAG = "WidgetAction"
+
+        /**
+         * PROTOTYPE — how long Live gets to come up before it is sent to the background.
+         * Too short and the trip home can land before Live is on screen, or interrupt its
+         * start-up; too long and the camera stays on needlessly.
+         */
+        private const val LIVE_BACKGROUND_DELAY_MS = 2_000L
+
+        /**
+         * PROTOTYPE — opens the launcher once Live is up, so it carries on as voice Live.
+         *
+         * Posted from the application context because this activity is gone by then: it
+         * finishes straight away, and noHistory would remove it anyway once Live covers it.
+         * Whether Android lets the start through is the open question this prototype is
+         * for — by then nothing of ours is on screen, and a blocked background start fails
+         * silently from here (the system logs it, not us).
+         */
+        private fun scheduleTripHome(context: Context) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                Log.i(TAG, "Sending Live to the background")
+                try {
+                    context.startActivity(
+                        SearchIntents.home().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                } catch (e: android.content.ActivityNotFoundException) {
+                    Log.w(TAG, "No launcher to return to", e)
+                }
+            }, LIVE_BACKGROUND_DELAY_MS)
+        }
 
         /** The click target for [action] — explicit, and unique per action. */
         fun intentFor(context: Context, action: WidgetAction): Intent =

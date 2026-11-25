@@ -21,6 +21,9 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
     LENS(R.drawable.ic_widget_lens, R.string.widget_action_lens),
     GEMINI(R.drawable.ic_widget_gemini, R.string.widget_action_gemini),
     GUIDED_VISION(R.drawable.ic_widget_guided_vision, R.string.widget_action_guided_vision),
+
+    /** PROTOTYPE — see [SearchIntents.liveVoice]. */
+    GEMINI_LIVE(R.drawable.ic_widget_live, R.string.widget_action_live),
     ;
 
     /**
@@ -33,6 +36,7 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
         LENS -> SearchIntents.lens(context).intent
         GEMINI -> SearchIntents.geminiChat().intent
         GUIDED_VISION -> SearchIntents.guidedVision().intent
+        GEMINI_LIVE -> SearchIntents.liveVoice().intent
     }
 
     /**
@@ -41,7 +45,7 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
      * by itself once the app it needs is installed or updated.
      */
     fun isAvailable(context: Context): Boolean = when (this) {
-        GUIDED_VISION -> SearchIntents.hasGuidedVision(context)
+        GUIDED_VISION, GEMINI_LIVE -> SearchIntents.hasGuidedVision(context)
         else -> true
     }
 }
