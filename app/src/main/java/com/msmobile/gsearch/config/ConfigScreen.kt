@@ -18,15 +18,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -241,6 +244,21 @@ private fun ActionList(
     var dragging by remember { mutableStateOf<WidgetAction?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val rowHeightPx = with(LocalDensity.current) { ROW_HEIGHT.toPx() }
+    var info by remember { mutableStateOf<WidgetAction?>(null) }
+
+    info?.let { action ->
+        val infoRes = action.infoRes ?: return@let
+        AlertDialog(
+            onDismissRequest = { info = null },
+            confirmButton = {
+                TextButton(onClick = { info = null }) {
+                    Text(stringResource(R.string.config_info_dismiss))
+                }
+            },
+            title = { Text(stringResource(action.labelRes)) },
+            text = { Text(stringResource(infoRes)) },
+        )
+    }
 
     Column {
         order.forEach { action ->
@@ -331,6 +349,22 @@ private fun ActionList(
                                 .weight(1f)
                                 .alpha(if (on) 1f else 0.4f),
                         )
+
+                        action.infoRes?.let {
+                            IconButton(
+                                onClick = { info = action },
+                                modifier = Modifier.testTag("info_${action.name}"),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_info),
+                                    contentDescription = stringResource(
+                                        R.string.config_info_description,
+                                        stringResource(action.labelRes),
+                                    ),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
 
                         Switch(
                             checked = on,

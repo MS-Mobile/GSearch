@@ -34,11 +34,14 @@
     <string name="widget_action_gemini">Gemini</string>
     <string name="widget_action_guided_vision">Guided vision</string>
     <string name="widget_action_live">Live</string>
+    <string name="widget_action_live_info">Gemini only lets other apps open Live with the camera on. So GSearch opens it that way and moves it to the background as soon as it starts listening, which turns the camera off and keeps voice Live running.\n\nThe first time, Live stays open so you can answer Gemini\'s prompts.</string>
 
     <string name="config_title">Search bar</string>
     <string name="config_buttons_heading">Buttons</string>
     <string name="config_buttons_hint">Drag the handle to reorder. Tapping the bar itself always searches.</string>
     <string name="config_reorder_description">Reorder %1$s</string>
+    <string name="config_info_description">About %1$s</string>
+    <string name="config_info_dismiss">Got it</string>
     <string name="config_opacity_heading">Opacity: %1$d%%</string>
     <string name="config_add_to_home">Add to home screen</string>
     <string name="config_done">Done</string>

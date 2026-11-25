@@ -15,7 +15,12 @@ import com.msmobile.gsearch.intents.SearchIntents
  * existing widget configurations. Declaration order is the order the settings screen
  * offers them in, and the fallback order for actions the user has not arranged.
  */
-enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: Int) {
+enum class WidgetAction(
+    @DrawableRes val iconRes: Int,
+    @StringRes val labelRes: Int,
+    /** A short "why it behaves like this", shown behind an info icon in the settings list. */
+    @StringRes val infoRes: Int? = null,
+) {
     SEARCH(R.drawable.ic_widget_search, R.string.widget_action_search),
     MIC(R.drawable.ic_widget_mic, R.string.widget_action_mic),
     LENS(R.drawable.ic_widget_lens, R.string.widget_action_lens),
@@ -23,7 +28,11 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
     GUIDED_VISION(R.drawable.ic_widget_guided_vision, R.string.widget_action_guided_vision),
 
     /** PROTOTYPE — see [SearchIntents.liveVoice]. */
-    GEMINI_LIVE(R.drawable.ic_widget_live, R.string.widget_action_live),
+    GEMINI_LIVE(
+        R.drawable.ic_widget_live,
+        R.string.widget_action_live,
+        infoRes = R.string.widget_action_live_info,
+    ),
     ;
 
     /**
