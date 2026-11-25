@@ -1,6 +1,7 @@
 package com.msmobile.gsearch.widget
 
 import com.msmobile.gsearch.widget.WidgetAction.GEMINI
+import com.msmobile.gsearch.widget.WidgetAction.GUIDED_VISION
 import com.msmobile.gsearch.widget.WidgetAction.LENS
 import com.msmobile.gsearch.widget.WidgetAction.MIC
 import com.msmobile.gsearch.widget.WidgetAction.SEARCH
@@ -12,8 +13,8 @@ import org.junit.Test
  * action, switched-off ones included, in the arrangement the user last left.
  *
  * The switched-off rows are the reason this is stored at all. Only the enabled actions go
- * into `KEY_ACTIONS`, so before the order was persisted a row that was switched off — or
- * dragged while switched off — had nowhere to record its position and reappeared at the
+ * into `KEY_ACTIONS`, so before the order was persisted a row that was switched off â€” or
+ * dragged while switched off â€” had nowhere to record its position and reappeared at the
  * bottom of the list on the next open.
  */
 class DisplayOrderTest {
@@ -21,7 +22,7 @@ class DisplayOrderTest {
     @Test
     fun `a stored order is returned as it was saved`() {
         assertEquals(
-            listOf(MIC, LENS, SEARCH, GEMINI),
+            listOf(MIC, LENS, SEARCH, GEMINI, GUIDED_VISION),
             WidgetConfig.parseOrder("MIC,LENS,SEARCH,GEMINI", listOf(LENS, SEARCH)),
         )
     }
@@ -44,7 +45,7 @@ class DisplayOrderTest {
     fun `switching an action off leaves it where it sits`() {
         val stored = WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI))
         assertEquals(
-            listOf(SEARCH, MIC, LENS, GEMINI),
+            listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION),
             WidgetConfig.parseOrder(stored, listOf(SEARCH, LENS)),
         )
     }
@@ -58,13 +59,13 @@ class DisplayOrderTest {
 
     /**
      * The migration case: a preference written by a build that stored only the enabled
-     * actions. Reproduces what the old `displayOrder(enabled)` did — enabled first, then
-     * the remainder in declaration order — so an upgrade does not rearrange the list.
+     * actions. Reproduces what the old `displayOrder(enabled)` did â€” enabled first, then
+     * the remainder in declaration order â€” so an upgrade does not rearrange the list.
      */
     @Test
     fun `with no stored order the enabled actions come first, then the rest`() {
         assertEquals(
-            listOf(GEMINI, SEARCH, MIC, LENS),
+            listOf(GEMINI, SEARCH, MIC, LENS, GUIDED_VISION),
             WidgetConfig.parseOrder(null, listOf(GEMINI, SEARCH)),
         )
     }
@@ -72,7 +73,7 @@ class DisplayOrderTest {
     @Test
     fun `an empty stored order is treated as none stored`() {
         assertEquals(
-            listOf(LENS, SEARCH, MIC, GEMINI),
+            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION),
             WidgetConfig.parseOrder("", listOf(LENS, SEARCH)),
         )
     }
@@ -85,7 +86,7 @@ class DisplayOrderTest {
     @Test
     fun `names that no longer resolve are dropped and the missing ones appended`() {
         assertEquals(
-            listOf(GEMINI, MIC, SEARCH, LENS),
+            listOf(GEMINI, MIC, SEARCH, LENS, GUIDED_VISION),
             WidgetConfig.parseOrder("GEMINI,ASSISTANT,MIC", listOf(SEARCH, MIC)),
         )
     }
@@ -93,14 +94,14 @@ class DisplayOrderTest {
     @Test
     fun `a duplicated name collapses to its first occurrence`() {
         assertEquals(
-            listOf(LENS, SEARCH, MIC, GEMINI),
+            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION),
             WidgetConfig.parseOrder("LENS,SEARCH,LENS", listOf(MIC)),
         )
     }
 
     @Test
     fun `serialiseOrder round-trips through parseOrder`() {
-        val order = listOf(GEMINI, LENS, MIC, SEARCH)
+        val order = listOf(GUIDED_VISION, GEMINI, LENS, MIC, SEARCH)
         assertEquals(
             order,
             WidgetConfig.parseOrder(
@@ -118,8 +119,8 @@ class DisplayOrderTest {
     @Test
     fun `serialiseOrder writes every action, not just the ones that fit the bar`() {
         assertEquals(
-            "SEARCH,MIC,LENS,GEMINI",
-            WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI)),
+            "SEARCH,MIC,LENS,GEMINI,GUIDED_VISION",
+            WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION)),
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.msmobile.gsearch.widget
 
 import com.msmobile.gsearch.widget.WidgetAction.GEMINI
+import com.msmobile.gsearch.widget.WidgetAction.GUIDED_VISION
 import com.msmobile.gsearch.widget.WidgetAction.LENS
 import com.msmobile.gsearch.widget.WidgetAction.MIC
 import com.msmobile.gsearch.widget.WidgetAction.SEARCH
@@ -101,13 +102,37 @@ class WidgetConfigTest {
     }
 
     /**
-     * The `take(MAX_ACTIONS)` cap in both functions is unreachable today, because there are
-     * exactly as many actions as slots and both lists are deduplicated first. This fails the
-     * day a fifth action is added — at which point the cap goes live and wants its own test.
+     * There are more actions than slots, so the `take(MAX_ACTIONS)` cap is live. The settings
+     * screen refuses to enable past it, but a hand-edited or corrupt preference can still
+     * name every action, and the bar must show the first ones rather than crowd.
      */
     @Test
-    fun `the slot cap is currently unreachable because every action fits`() {
-        assertEquals(WidgetConfig.MAX_ACTIONS, WidgetAction.entries.size)
+    fun `there are more actions than the bar has slots`() {
+        assertTrue(WidgetAction.entries.size > WidgetConfig.MAX_ACTIONS)
+    }
+
+    @Test
+    fun `parseActions keeps only the first MAX_ACTIONS when more are stored`() {
+        assertEquals(
+            listOf(GUIDED_VISION, SEARCH, MIC, LENS),
+            WidgetConfig.parseActions("GUIDED_VISION,SEARCH,MIC,LENS,GEMINI"),
+        )
+    }
+
+    @Test
+    fun `serialiseActions writes only the first MAX_ACTIONS`() {
+        assertEquals(
+            "SEARCH,MIC,LENS,GEMINI",
+            WidgetConfig.serialiseActions(listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION)),
+        )
+    }
+
+    @Test
+    fun `the cap counts distinct actions, so duplicates do not crowd one out`() {
+        assertEquals(
+            listOf(SEARCH, MIC, LENS, GEMINI),
+            WidgetConfig.parseActions("SEARCH,SEARCH,MIC,LENS,GEMINI,GUIDED_VISION"),
+        )
     }
 
     @Test
@@ -117,6 +142,7 @@ class WidgetConfigTest {
         assertEquals(WidgetConfig.DEFAULT_ACTIONS.distinct(), WidgetConfig.DEFAULT_ACTIONS)
         assertTrue(SEARCH in WidgetConfig.DEFAULT_ACTIONS)
         assertTrue(GEMINI !in WidgetConfig.DEFAULT_ACTIONS)
+        assertTrue(GUIDED_VISION !in WidgetConfig.DEFAULT_ACTIONS)
     }
 
     /**
@@ -127,7 +153,7 @@ class WidgetConfigTest {
     @Test
     fun `the persisted names are the ones already on devices`() {
         assertEquals(
-            listOf("SEARCH", "MIC", "LENS", "GEMINI"),
+            listOf("SEARCH", "MIC", "LENS", "GEMINI", "GUIDED_VISION"),
             WidgetAction.entries.map { it.name },
         )
     }

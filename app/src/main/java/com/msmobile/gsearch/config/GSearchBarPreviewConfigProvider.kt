@@ -46,7 +46,7 @@ internal class GSearchBarPreviewConfigProvider :
         // MAX_ACTIONS icons sharing the pill, which is the tightest the glyphs ever sit.
         GSearchBarPreviewConfig(
             configName = "All Actions",
-            actions = WidgetAction.entries.toList(),
+            actions = FULL_BAR,
             opacity = WidgetConfig.MAX_OPACITY_PERCENT.asOpacity(),
         ),
         // The opposite boundary: a single icon, which the row centres in the whole pill.

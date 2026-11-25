@@ -40,11 +40,12 @@ internal class ConfigPreviewConfigProvider : PreviewParameterProvider<ConfigPrev
             actions = WidgetConfig.DEFAULT_ACTIONS,
             opacityPercent = WidgetConfig.DEFAULT_OPACITY_PERCENT,
         ),
-        // Every switch on, which is also the state where the remaining off switches go
-        // disabled — nothing more can be enabled at MAX_ACTIONS.
+        // A full bar: MAX_ACTIONS switches on, which is the state where the remaining off
+        // switch goes disabled — nothing more can be enabled. The newest action is among
+        // the enabled ones so its icon is pinned too.
         ConfigPreviewConfig(
             configName = "All Actions",
-            actions = WidgetAction.entries.toList(),
+            actions = FULL_BAR,
             opacityPercent = WidgetConfig.MAX_OPACITY_PERCENT,
         ),
         // The opposite boundary: one action left, so its switch is the disabled one. The
@@ -73,3 +74,14 @@ internal class ConfigPreviewConfigProvider : PreviewParameterProvider<ConfigPrev
 
     override fun getDisplayName(index: Int): String = values.elementAt(index).configName
 }
+
+/**
+ * As many actions as the bar holds. There are more actions than slots, so this is a chosen
+ * subset rather than every entry; shared with [GSearchBarPreviewConfigProvider].
+ */
+internal val FULL_BAR = listOf(
+    WidgetAction.SEARCH,
+    WidgetAction.LENS,
+    WidgetAction.GEMINI,
+    WidgetAction.GUIDED_VISION,
+)
