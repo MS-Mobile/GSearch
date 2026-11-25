@@ -69,11 +69,15 @@ class WidgetActionActivity : Activity() {
         private const val TAG = "WidgetAction"
 
         /**
-         * PROTOTYPE — the latest the trip home happens if the microphone signal never comes
-         * (Gemini lacks the mic permission, or the shortcut's server flag is off). Well
-         * inside Android's background-activity-start grace period after the tap.
+         * PROTOTYPE — how long to wait for the microphone before giving up on the trip home.
+         *
+         * Giving up means staying put, not going home anyway. No mic means Live is not
+         * running yet — most likely Gemini is asking for the microphone permission on first
+         * use, or the shortcut's server flag is off — and sending that to the background
+         * would hide the very prompt the user has to answer. Kept short so a mic that only
+         * starts after the user answers a prompt does not yank Live away from them.
          */
-        private const val LIVE_BACKGROUND_TIMEOUT_MS = 3_000L
+        private const val LIVE_MIC_WAIT_MS = 3_000L
 
         /**
          * PROTOTYPE — opens the launcher once Live is up, so it carries on as voice Live.
@@ -95,13 +99,17 @@ class WidgetActionActivity : Activity() {
             val started = SystemClock.elapsedRealtime()
             var done = false
             lateinit var callback: AudioManager.AudioRecordingCallback
-            fun goHome(reason: String) {
-                if (done) return
+            fun stopWaiting(): Boolean {
+                if (done) return false
                 done = true
                 audio.unregisterAudioRecordingCallback(callback)
                 handler.removeCallbacksAndMessages(null)
+                return true
+            }
+            fun goHome() {
+                if (!stopWaiting()) return
                 val elapsed = SystemClock.elapsedRealtime() - started
-                Log.i(TAG, "Sending Live to the background ($reason, +${elapsed}ms)")
+                Log.i(TAG, "Sending Live to the background (microphone started, +${elapsed}ms)")
                 try {
                     context.startActivity(
                         SearchIntents.home().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
@@ -112,11 +120,13 @@ class WidgetActionActivity : Activity() {
             }
             callback = object : AudioManager.AudioRecordingCallback() {
                 override fun onRecordingConfigChanged(configs: List<AudioRecordingConfiguration>) {
-                    if (configs.isNotEmpty()) goHome("microphone started")
+                    if (configs.isNotEmpty()) goHome()
                 }
             }
             audio.registerAudioRecordingCallback(callback, handler)
-            handler.postDelayed({ goHome("timeout") }, LIVE_BACKGROUND_TIMEOUT_MS)
+            handler.postDelayed({
+                if (stopWaiting()) Log.i(TAG, "No microphone within ${LIVE_MIC_WAIT_MS}ms; leaving Live in front")
+            }, LIVE_MIC_WAIT_MS)
         }
 
         /** The click target for [action] — explicit, and unique per action. */
