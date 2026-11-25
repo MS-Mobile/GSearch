@@ -15,12 +15,24 @@ import com.msmobile.gsearch.intents.SearchIntents
  * existing widget configurations. Declaration order is the order the settings screen
  * offers them in, and the fallback order for actions the user has not arranged.
  */
-enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: Int) {
+enum class WidgetAction(
+    @DrawableRes val iconRes: Int,
+    @StringRes val labelRes: Int,
+    /** A short "why it behaves like this", shown behind an info icon in the settings list. */
+    @StringRes val infoRes: Int? = null,
+) {
     SEARCH(R.drawable.ic_widget_search, R.string.widget_action_search),
     MIC(R.drawable.ic_widget_mic, R.string.widget_action_mic),
     LENS(R.drawable.ic_widget_lens, R.string.widget_action_lens),
     GEMINI(R.drawable.ic_widget_gemini, R.string.widget_action_gemini),
     GUIDED_VISION(R.drawable.ic_widget_guided_vision, R.string.widget_action_guided_vision),
+
+    /** Voice-only Live — see [SearchIntents.liveVoice]. */
+    GEMINI_LIVE(
+        R.drawable.ic_widget_live,
+        R.string.widget_action_live,
+        infoRes = R.string.widget_action_live_info,
+    ),
     ;
 
     /**
@@ -33,6 +45,7 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
         LENS -> SearchIntents.lens(context).intent
         GEMINI -> SearchIntents.geminiChat().intent
         GUIDED_VISION -> SearchIntents.guidedVision().intent
+        GEMINI_LIVE -> SearchIntents.liveVoice().intent
     }
 
     /**
@@ -41,7 +54,7 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
      * by itself once the app it needs is installed or updated.
      */
     fun isAvailable(context: Context): Boolean = when (this) {
-        GUIDED_VISION -> SearchIntents.hasGuidedVision(context)
+        GUIDED_VISION, GEMINI_LIVE -> SearchIntents.hasGuidedVision(context)
         else -> true
     }
 }

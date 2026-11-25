@@ -19,6 +19,7 @@ internal data class ConfigPreviewConfig(
     val actions: List<WidgetAction>,
     val opacityPercent: Int,
     val canPinWidget: Boolean = true,
+    val infoOpenFor: WidgetAction? = null,
 )
 
 /**
@@ -69,6 +70,13 @@ internal class ConfigPreviewConfigProvider : PreviewParameterProvider<ConfigPrev
             actions = WidgetConfig.DEFAULT_ACTIONS,
             opacityPercent = WidgetConfig.DEFAULT_OPACITY_PERCENT,
             canPinWidget = false,
+        ),
+        // The info dialog behind Live's ⓘ, open — the only place its text is rendered.
+        ConfigPreviewConfig(
+            configName = "Live Info",
+            actions = WidgetConfig.DEFAULT_ACTIONS,
+            opacityPercent = WidgetConfig.DEFAULT_OPACITY_PERCENT,
+            infoOpenFor = WidgetAction.GEMINI_LIVE,
         ),
     )
 

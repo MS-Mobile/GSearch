@@ -1,6 +1,7 @@
 package com.msmobile.gsearch.widget
 
 import com.msmobile.gsearch.widget.WidgetAction.GEMINI
+import com.msmobile.gsearch.widget.WidgetAction.GEMINI_LIVE
 import com.msmobile.gsearch.widget.WidgetAction.GUIDED_VISION
 import com.msmobile.gsearch.widget.WidgetAction.LENS
 import com.msmobile.gsearch.widget.WidgetAction.MIC
@@ -22,7 +23,7 @@ class DisplayOrderTest {
     @Test
     fun `a stored order is returned as it was saved`() {
         assertEquals(
-            listOf(MIC, LENS, SEARCH, GEMINI, GUIDED_VISION),
+            listOf(MIC, LENS, SEARCH, GEMINI, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder("MIC,LENS,SEARCH,GEMINI", listOf(LENS, SEARCH)),
         )
     }
@@ -45,7 +46,7 @@ class DisplayOrderTest {
     fun `switching an action off leaves it where it sits`() {
         val stored = WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI))
         assertEquals(
-            listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION),
+            listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder(stored, listOf(SEARCH, LENS)),
         )
     }
@@ -65,7 +66,7 @@ class DisplayOrderTest {
     @Test
     fun `with no stored order the enabled actions come first, then the rest`() {
         assertEquals(
-            listOf(GEMINI, SEARCH, MIC, LENS, GUIDED_VISION),
+            listOf(GEMINI, SEARCH, MIC, LENS, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder(null, listOf(GEMINI, SEARCH)),
         )
     }
@@ -73,7 +74,7 @@ class DisplayOrderTest {
     @Test
     fun `an empty stored order is treated as none stored`() {
         assertEquals(
-            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION),
+            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder("", listOf(LENS, SEARCH)),
         )
     }
@@ -86,7 +87,7 @@ class DisplayOrderTest {
     @Test
     fun `names that no longer resolve are dropped and the missing ones appended`() {
         assertEquals(
-            listOf(GEMINI, MIC, SEARCH, LENS, GUIDED_VISION),
+            listOf(GEMINI, MIC, SEARCH, LENS, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder("GEMINI,ASSISTANT,MIC", listOf(SEARCH, MIC)),
         )
     }
@@ -94,14 +95,14 @@ class DisplayOrderTest {
     @Test
     fun `a duplicated name collapses to its first occurrence`() {
         assertEquals(
-            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION),
+            listOf(LENS, SEARCH, MIC, GEMINI, GUIDED_VISION, GEMINI_LIVE),
             WidgetConfig.parseOrder("LENS,SEARCH,LENS", listOf(MIC)),
         )
     }
 
     @Test
     fun `serialiseOrder round-trips through parseOrder`() {
-        val order = listOf(GUIDED_VISION, GEMINI, LENS, MIC, SEARCH)
+        val order = listOf(GEMINI_LIVE, GUIDED_VISION, GEMINI, LENS, MIC, SEARCH)
         assertEquals(
             order,
             WidgetConfig.parseOrder(
@@ -119,8 +120,8 @@ class DisplayOrderTest {
     @Test
     fun `serialiseOrder writes every action, not just the ones that fit the bar`() {
         assertEquals(
-            "SEARCH,MIC,LENS,GEMINI,GUIDED_VISION",
-            WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION)),
+            "SEARCH,MIC,LENS,GEMINI,GUIDED_VISION,GEMINI_LIVE",
+            WidgetConfig.serialiseOrder(listOf(SEARCH, MIC, LENS, GEMINI, GUIDED_VISION, GEMINI_LIVE)),
         )
     }
 }

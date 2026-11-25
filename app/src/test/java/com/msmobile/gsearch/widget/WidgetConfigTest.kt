@@ -169,6 +169,7 @@ class WidgetConfigTest {
         assertTrue(SEARCH in WidgetConfig.DEFAULT_ACTIONS)
         assertTrue(GEMINI !in WidgetConfig.DEFAULT_ACTIONS)
         assertTrue(GUIDED_VISION !in WidgetConfig.DEFAULT_ACTIONS)
+        assertTrue(WidgetAction.GEMINI_LIVE !in WidgetConfig.DEFAULT_ACTIONS)
     }
 
     /**
@@ -179,7 +180,7 @@ class WidgetConfigTest {
     @Test
     fun `the persisted names are the ones already on devices`() {
         assertEquals(
-            listOf("SEARCH", "MIC", "LENS", "GEMINI", "GUIDED_VISION"),
+            listOf("SEARCH", "MIC", "LENS", "GEMINI", "GUIDED_VISION", "GEMINI_LIVE"),
             WidgetAction.entries.map { it.name },
         )
     }

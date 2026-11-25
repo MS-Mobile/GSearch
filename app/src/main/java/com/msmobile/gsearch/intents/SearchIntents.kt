@@ -1,9 +1,11 @@
 package com.msmobile.gsearch.intents
 
+import android.Manifest
 import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.speech.RecognizerIntent
 import androidx.core.net.toUri
 
@@ -99,6 +101,34 @@ object SearchIntents {
      */
     fun hasGuidedVision(context: Context): Boolean =
         context.packageManager.resolveActivity(guidedVision().intent, 0) != null
+
+    /**
+     * Voice-only Gemini Live, reached through [guidedVision].
+     *
+     * There is no intent for voice Live a third-party app may use (see [guidedVision]). But
+     * Live survives being sent to the background: it keeps running as a foreground service
+     * with its "Live with Gemini — Listening…" notification, and the camera is dropped,
+     * because Android does not let a backgrounded app keep it. So guided vision followed by
+     * a trip to the launcher ends as voice Live, minimised. The caller does the second half.
+     * Offered under the same condition as guided vision, [hasGuidedVision].
+     *
+     * Known costs: the camera is on for the length of the delay, and a first-run consent
+     * dialog in Live would be interrupted by the trip home.
+     */
+    fun liveVoice() = guidedVision()
+
+    /**
+     * Whether Live, which runs inside [GOOGLE_APP], may already use the camera.
+     * Without it, Live's first guided-vision start asks for it — measured on a Galaxy S23
+     * after clearing data: the mic started first, then the camera prompt appeared, so the
+     * mic alone cannot tell "ready" from "about to ask". Needs [GOOGLE_APP] in `<queries>`.
+     */
+    fun liveHasCamera(context: Context): Boolean =
+        context.packageManager.checkPermission(Manifest.permission.CAMERA, GOOGLE_APP) ==
+            PackageManager.PERMISSION_GRANTED
+
+    /** The launcher, which is what pressing HOME would show. */
+    fun home(): Intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
 
     /**
      * Lens, resolved at bind time:
