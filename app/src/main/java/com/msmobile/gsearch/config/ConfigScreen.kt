@@ -82,6 +82,8 @@ fun ConfigScreen(
     onAddToHomeScreen: () -> Unit,
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The action whose info dialog starts open; only previews set it. */
+    initialInfo: WidgetAction? = null,
 ) {
     // All four actions in display order; whether each is on is tracked separately so a
     // row keeps its place when switched off instead of jumping to the end of the list.
@@ -142,6 +144,7 @@ fun ConfigScreen(
                     order.add(to, order.removeAt(from))
                     saveArrangement()
                 },
+                initialInfo = initialInfo,
             )
 
             Text(
@@ -240,11 +243,12 @@ private fun ActionList(
     canDisable: () -> Boolean,
     canEnable: () -> Boolean,
     onMove: (Int, Int) -> Unit,
+    initialInfo: WidgetAction?,
 ) {
     var dragging by remember { mutableStateOf<WidgetAction?>(null) }
     var dragOffset by remember { mutableFloatStateOf(0f) }
     val rowHeightPx = with(LocalDensity.current) { ROW_HEIGHT.toPx() }
-    var info by remember { mutableStateOf<WidgetAction?>(null) }
+    var info by remember { mutableStateOf(initialInfo) }
 
     info?.let { action ->
         val infoRes = action.infoRes ?: return@let
@@ -416,6 +420,7 @@ internal fun ConfigScreenPreview(
             onOpacityChange = {},
             onAddToHomeScreen = {},
             onDone = {},
+            initialInfo = config.infoOpenFor,
         )
     }
 }
