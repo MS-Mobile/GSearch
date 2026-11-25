@@ -27,7 +27,7 @@ enum class WidgetAction(
     GEMINI(R.drawable.ic_widget_gemini, R.string.widget_action_gemini),
     GUIDED_VISION(R.drawable.ic_widget_guided_vision, R.string.widget_action_guided_vision),
 
-    /** PROTOTYPE — see [SearchIntents.liveVoice]. */
+    /** Voice-only Live — see [SearchIntents.liveVoice]. */
     GEMINI_LIVE(
         R.drawable.ic_widget_live,
         R.string.widget_action_live,

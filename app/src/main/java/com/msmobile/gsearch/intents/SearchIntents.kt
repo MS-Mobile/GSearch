@@ -103,7 +103,7 @@ object SearchIntents {
         context.packageManager.resolveActivity(guidedVision().intent, 0) != null
 
     /**
-     * PROTOTYPE — voice-only Gemini Live, reached through [guidedVision].
+     * Voice-only Gemini Live, reached through [guidedVision].
      *
      * There is no intent for voice Live a third-party app may use (see [guidedVision]). But
      * Live survives being sent to the background: it keeps running as a foreground service
@@ -118,7 +118,7 @@ object SearchIntents {
     fun liveVoice() = guidedVision()
 
     /**
-     * PROTOTYPE — whether Live, which runs inside [GOOGLE_APP], may already use the camera.
+     * Whether Live, which runs inside [GOOGLE_APP], may already use the camera.
      * Without it, Live's first guided-vision start asks for it — measured on a Galaxy S23
      * after clearing data: the mic started first, then the camera prompt appeared, so the
      * mic alone cannot tell "ready" from "about to ask". Needs [GOOGLE_APP] in `<queries>`.

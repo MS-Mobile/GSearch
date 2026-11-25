@@ -75,7 +75,7 @@ class WidgetActionActivity : Activity() {
         private const val TAG = "WidgetAction"
 
         /**
-         * PROTOTYPE — how long to wait for the microphone before giving up on the trip home.
+         * How long to wait for the microphone before giving up on the trip home.
          *
          * Giving up means staying put, not going home anyway. No mic means Live is not
          * running yet — most likely Gemini is asking for the microphone permission on first
@@ -86,7 +86,7 @@ class WidgetActionActivity : Activity() {
         private const val LIVE_MIC_WAIT_MS = 3_000L
 
         /**
-         * PROTOTYPE — opens the launcher once Live is up, so it carries on as voice Live.
+         * Opens the launcher once Live is up, so it carries on as voice Live.
          *
          * "Up" is Live starting the microphone, observed through
          * [AudioManager.registerAudioRecordingCallback], which needs no permission. Measured
