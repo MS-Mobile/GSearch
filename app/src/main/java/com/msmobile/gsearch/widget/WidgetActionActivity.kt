@@ -53,7 +53,13 @@ class WidgetActionActivity : Activity() {
             val target = action.intent(this)
             startActivity(target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             if (action == WidgetAction.GEMINI_LIVE) {
-                scheduleTripHome(applicationContext)
+                if (SearchIntents.liveHasCamera(this)) {
+                    scheduleTripHome(applicationContext)
+                } else {
+                    // Live will ask for the camera right after it starts the mic, so the
+                    // mic is no sign it is ready: going home would hide that prompt.
+                    Log.i(TAG, "Google app lacks the camera permission; leaving Live in front")
+                }
             }
         } catch (e: android.content.ActivityNotFoundException) {
             // Reachable in the real world: every action targets the Google app, which can
