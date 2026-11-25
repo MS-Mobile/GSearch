@@ -28,6 +28,20 @@ import com.msmobile.gsearch.widget.WidgetRefresh
  */
 class ConfigActivity : ComponentActivity() {
 
+    /**
+     * Redraws the bar on every visit, not only on edits: an action's availability can change
+     * behind our back (the Gemini app updated, disabled or removed), nothing else tells the
+     * widget, and opening the app is the natural thing to try when a button is missing.
+     *
+     * onStart rather than onCreate, because reopening the app usually brings back the
+     * existing instance without creating it again — measured: a refresh placed in onCreate
+     * never ran on the second visit, and the bar kept a button for a disabled Gemini.
+     */
+    override fun onStart() {
+        super.onStart()
+        WidgetRefresh.request(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -56,8 +70,12 @@ class ConfigActivity : ComponentActivity() {
         setContent {
             GSearchTheme {
                 ConfigScreen(
-                    initialOrder = WidgetConfig.displayOrder(this),
-                    initialActions = WidgetConfig.actions(this),
+                    // Unavailable actions are left out of the list entirely rather than
+                    // shown disabled: there is nothing the user could do to switch them on.
+                    initialOrder = WidgetConfig.displayOrder(this).filter { it.isAvailable(this) },
+                    initialActions = WidgetConfig.availableOnly(WidgetConfig.actions(this)) {
+                        it.isAvailable(this)
+                    },
                     initialOpacity = WidgetConfig.opacityPercent(this),
                     canPinWidget = canPinWidget(),
                     onArrangementChange = { order, actions ->

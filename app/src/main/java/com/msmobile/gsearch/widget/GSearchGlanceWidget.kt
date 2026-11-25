@@ -57,8 +57,9 @@ class GSearchGlanceWidget(
             // The fallback matters for a widget placed after the settings were changed:
             // it has no state of its own yet, so it reads the app's preferences directly.
             val state = currentState<Preferences>()
-            val actions = state[KEY_ACTIONS]?.let(WidgetConfig::parseActions)
+            val stored = state[KEY_ACTIONS]?.let(WidgetConfig::parseActions)
                 ?: WidgetConfig.actions(context)
+            val actions = WidgetConfig.availableOnly(stored) { it.isAvailable(context) }
             val opacityPercent = state[KEY_OPACITY] ?: WidgetConfig.opacityPercent(context)
             // Mirrored like the rest, for the same reason: a direct read is not observable,
             // so a session already open would keep judging against the old wallpaper.
@@ -89,7 +90,13 @@ class GSearchGlanceWidget(
             context: Context,
             wallpaperColorSource: WallpaperColorSource = SystemWallpaperColorSource(context),
         ) {
-            val actions = WidgetConfig.serialiseActions(WidgetConfig.actions(context))
+            // Filtered here, not only at composition: availability is not Compose state, so
+            // a change to it alone would not redraw the widget. Writing the filtered list
+            // makes "Gemini was updated" a state change like any edit. Only the mirror is
+            // filtered — the saved preference keeps the action for when it returns.
+            val actions = WidgetConfig.serialiseActions(
+                WidgetConfig.availableOnly(WidgetConfig.actions(context)) { it.isAvailable(context) },
+            )
             val opacity = WidgetConfig.opacityPercent(context)
             val wallpaperColor = wallpaperColorSource.primaryColor()?.toArgb()
             GlanceAppWidgetManager(context)

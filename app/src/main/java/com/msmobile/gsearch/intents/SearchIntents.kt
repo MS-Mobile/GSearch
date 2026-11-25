@@ -68,8 +68,9 @@ object SearchIntents {
     )
 
     /**
-     * Gemini Live with the camera on — "guided vision". Falls back to [geminiChat] when the
-     * Gemini app is too old to have the shortcut, or missing.
+     * Gemini Live with the camera on — "guided vision". Only offered when
+     * [hasGuidedVision] says the shortcut is installed; there is no fallback, so on a
+     * device without it the button is hidden rather than doing something else.
      *
      * This is the one way into Live open to a third-party app. Live itself only honours
      * its `feature=` deep link when Gemini is the caller; the same link fired from anywhere
@@ -81,14 +82,23 @@ object SearchIntents {
      * One failure stays invisible: the shortcut is gated by a server flag, and with the
      * flag off it finishes without showing anything. That cannot be detected from here.
      */
-    fun guidedVision(context: Context): Candidate {
-        val shortcut = Intent(Intent.ACTION_MAIN)
-            .setComponent(ComponentName(GEMINI_APP, GUIDED_VISION_ACTIVITY))
-        if (shortcut.resolveActivity(context.packageManager) != null) {
-            return Candidate("Guided vision", shortcut)
-        }
-        return Candidate("Guided vision (via Gemini)", geminiChat().intent)
-    }
+    fun guidedVision() = Candidate(
+        "Guided vision",
+        Intent(Intent.ACTION_MAIN)
+            .setComponent(ComponentName(GEMINI_APP, GUIDED_VISION_ACTIVITY)),
+    )
+
+    /**
+     * Whether the installed Gemini app has the guided-vision shortcut — absent before
+     * 1.0.1009, or when Gemini is missing or disabled. Needs [GEMINI_APP] in `<queries>`.
+     *
+     * Asks [android.content.pm.PackageManager.resolveActivity], not
+     * [Intent.resolveActivity]: for an explicit intent the latter hands back the
+     * component it was given without looking it up, so it says yes even with Gemini
+     * disabled. Measured, not assumed — the button stayed visible until this was changed.
+     */
+    fun hasGuidedVision(context: Context): Boolean =
+        context.packageManager.resolveActivity(guidedVision().intent, 0) != null
 
     /**
      * Lens, resolved at bind time:

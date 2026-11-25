@@ -92,6 +92,32 @@ class WidgetConfigTest {
     }
 
     @Test
+    fun `availableOnly drops unavailable actions and keeps the order`() {
+        assertEquals(
+            listOf(SEARCH, GEMINI),
+            WidgetConfig.availableOnly(listOf(SEARCH, GUIDED_VISION, GEMINI)) {
+                it != GUIDED_VISION
+            },
+        )
+    }
+
+    @Test
+    fun `availableOnly falls back to the defaults when nothing is left`() {
+        assertEquals(
+            WidgetConfig.DEFAULT_ACTIONS,
+            WidgetConfig.availableOnly(listOf(GUIDED_VISION)) { it != GUIDED_VISION },
+        )
+    }
+
+    @Test
+    fun `availableOnly never returns an empty list while the defaults are available`() {
+        val noGuidedVision: (WidgetAction) -> Boolean = { it != GUIDED_VISION }
+        listOf(emptyList(), listOf(GUIDED_VISION), WidgetAction.entries.toList()).forEach {
+            assertTrue(WidgetConfig.availableOnly(it, noGuidedVision).isNotEmpty())
+        }
+    }
+
+    @Test
     fun `backgroundActionIn prefers SEARCH wherever it sits in the order`() {
         assertEquals(SEARCH, WidgetConfig.backgroundActionIn(listOf(LENS, MIC, SEARCH)))
     }

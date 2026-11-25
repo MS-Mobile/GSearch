@@ -109,6 +109,20 @@ object WidgetConfig {
         return parsed.ifEmpty { DEFAULT_ACTIONS }
     }
 
+    /**
+     * [actions] without the ones this device cannot perform, for display only — what is
+     * stored is left alone, so a hidden action reappears when it becomes available.
+     *
+     * Falls back to the available defaults when filtering empties the list: a bar whose
+     * only button is unavailable must still show something, and [backgroundActionIn]
+     * calls `first()`. The defaults need nothing beyond the Google app, so they survive it.
+     */
+    fun availableOnly(
+        actions: List<WidgetAction>,
+        isAvailable: (WidgetAction) -> Boolean,
+    ): List<WidgetAction> =
+        actions.filter(isAvailable).ifEmpty { DEFAULT_ACTIONS.filter(isAvailable) }
+
     /** 100 means as designed — the pill drawable is opaque and alpha comes only from here. */
     fun opacityPercent(context: Context): Int =
         prefs(context).getInt(KEY_OPACITY, DEFAULT_OPACITY_PERCENT)

@@ -24,15 +24,24 @@ enum class WidgetAction(@DrawableRes val iconRes: Int, @StringRes val labelRes: 
     ;
 
     /**
-     * Resolved per-bind rather than stored, because [LENS] and [GUIDED_VISION] depend on
-     * what is installed and that can change between updates without the widget being
-     * reconfigured.
+     * Resolved per-bind rather than stored, because [LENS] depends on what is installed
+     * and that can change between updates without the widget being reconfigured.
      */
     fun intent(context: Context): Intent = when (this) {
         SEARCH -> SearchIntents.search().intent
         MIC -> SearchIntents.voice().intent
         LENS -> SearchIntents.lens(context).intent
         GEMINI -> SearchIntents.geminiChat().intent
-        GUIDED_VISION -> SearchIntents.guidedVision(context).intent
+        GUIDED_VISION -> SearchIntents.guidedVision().intent
+    }
+
+    /**
+     * Whether this device can perform the action at all. False hides it from both the
+     * settings list and the bar; the stored configuration still names it, so it returns
+     * by itself once the app it needs is installed or updated.
+     */
+    fun isAvailable(context: Context): Boolean = when (this) {
+        GUIDED_VISION -> SearchIntents.hasGuidedVision(context)
+        else -> true
     }
 }
