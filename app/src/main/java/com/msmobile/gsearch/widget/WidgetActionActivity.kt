@@ -3,9 +3,12 @@ package com.msmobile.gsearch.widget
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
+import android.media.AudioRecordingConfiguration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -66,24 +69,39 @@ class WidgetActionActivity : Activity() {
         private const val TAG = "WidgetAction"
 
         /**
-         * PROTOTYPE — how long Live gets to come up before it is sent to the background.
-         * Too short and the trip home can land before Live is on screen, or interrupt its
-         * start-up; too long and the camera stays on needlessly.
+         * PROTOTYPE — the latest the trip home happens if the microphone signal never comes
+         * (Gemini lacks the mic permission, or the shortcut's server flag is off). Well
+         * inside Android's background-activity-start grace period after the tap.
          */
-        private const val LIVE_BACKGROUND_DELAY_MS = 2_000L
+        private const val LIVE_BACKGROUND_TIMEOUT_MS = 3_000L
 
         /**
          * PROTOTYPE — opens the launcher once Live is up, so it carries on as voice Live.
          *
-         * Posted from the application context because this activity is gone by then: it
+         * "Up" is Live starting the microphone, observed through
+         * [AudioManager.registerAudioRecordingCallback], which needs no permission. Measured
+         * on a Galaxy S23: Live's screen at +0.08 s, mic at +0.44 s, camera at +0.82 s —
+         * so leaving on the mic beats the camera, where a fixed 1 s delay did not. The
+         * camera was measured opening late on an emulator too (after the trip home), so it
+         * is no use as the trigger. Blind spot: any other app starting to record in that
+         * window triggers it as well.
+         *
+         * Lives in the application context because this activity is gone by then: it
          * finishes straight away, and noHistory would remove it anyway once Live covers it.
-         * Whether Android lets the start through is the open question this prototype is
-         * for — by then nothing of ours is on screen, and a blocked background start fails
-         * silently from here (the system logs it, not us).
          */
         private fun scheduleTripHome(context: Context) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                Log.i(TAG, "Sending Live to the background")
+            val handler = Handler(Looper.getMainLooper())
+            val audio = context.getSystemService(AudioManager::class.java)
+            val started = SystemClock.elapsedRealtime()
+            var done = false
+            lateinit var callback: AudioManager.AudioRecordingCallback
+            fun goHome(reason: String) {
+                if (done) return
+                done = true
+                audio.unregisterAudioRecordingCallback(callback)
+                handler.removeCallbacksAndMessages(null)
+                val elapsed = SystemClock.elapsedRealtime() - started
+                Log.i(TAG, "Sending Live to the background ($reason, +${elapsed}ms)")
                 try {
                     context.startActivity(
                         SearchIntents.home().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
@@ -91,7 +109,14 @@ class WidgetActionActivity : Activity() {
                 } catch (e: android.content.ActivityNotFoundException) {
                     Log.w(TAG, "No launcher to return to", e)
                 }
-            }, LIVE_BACKGROUND_DELAY_MS)
+            }
+            callback = object : AudioManager.AudioRecordingCallback() {
+                override fun onRecordingConfigChanged(configs: List<AudioRecordingConfiguration>) {
+                    if (configs.isNotEmpty()) goHome("microphone started")
+                }
+            }
+            audio.registerAudioRecordingCallback(callback, handler)
+            handler.postDelayed({ goHome("timeout") }, LIVE_BACKGROUND_TIMEOUT_MS)
         }
 
         /** The click target for [action] — explicit, and unique per action. */
