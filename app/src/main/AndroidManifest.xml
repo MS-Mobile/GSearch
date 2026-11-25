@@ -20,6 +20,8 @@
         <package android:name="com.google.ar.lens" />
         <!-- Fallback when Lens is not installed. -->
         <package android:name="com.android.vending" />
+        <!-- Guided vision launches the Gemini app's own shortcut activity. -->
+        <package android:name="com.google.android.apps.bard" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />

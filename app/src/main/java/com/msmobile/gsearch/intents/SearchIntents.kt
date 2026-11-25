@@ -14,6 +14,13 @@ const val LENS_APP = "com.google.ar.lens"
 
 const val PLAY_STORE = "com.android.vending"
 
+/** The Gemini app — a thin shell that hands most of its work to [GOOGLE_APP]. */
+const val GEMINI_APP = "com.google.android.apps.bard"
+
+/** Gemini's accessibility-shortcut target for guided vision; exported since 1.0.1009. */
+private const val GUIDED_VISION_ACTIVITY =
+    "com.google.android.apps.bard.shellapp.VisualInterpreterShortcutActivity"
+
 data class Candidate(val label: String, val intent: Intent)
 
 /**
@@ -59,6 +66,29 @@ object SearchIntents {
         "Gemini",
         Intent(RecognizerIntent.ACTION_WEB_SEARCH).setPackage(GOOGLE_APP),
     )
+
+    /**
+     * Gemini Live with the camera on — "guided vision". Falls back to [geminiChat] when the
+     * Gemini app is too old to have the shortcut, or missing.
+     *
+     * This is the one way into Live open to a third-party app. Live itself only honours
+     * its `feature=` deep link when Gemini is the caller; the same link fired from anywhere
+     * else lands on plain chat. Gemini's accessibility shortcut is exported, takes no
+     * input, and forwards to the Google app *as Gemini* (`setShareIdentityEnabled`), so
+     * launching it gets the caller check passed on our behalf. Its options are fixed by
+     * Gemini — the camera is always on, which is why this is not offered as plain "Live".
+     *
+     * One failure stays invisible: the shortcut is gated by a server flag, and with the
+     * flag off it finishes without showing anything. That cannot be detected from here.
+     */
+    fun guidedVision(context: Context): Candidate {
+        val shortcut = Intent(Intent.ACTION_MAIN)
+            .setComponent(ComponentName(GEMINI_APP, GUIDED_VISION_ACTIVITY))
+        if (shortcut.resolveActivity(context.packageManager) != null) {
+            return Candidate("Guided vision", shortcut)
+        }
+        return Candidate("Guided vision (via Gemini)", geminiChat().intent)
+    }
 
     /**
      * Lens, resolved at bind time:

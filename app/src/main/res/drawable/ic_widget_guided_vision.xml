@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Video camera, taken from the Gemini app's own icon set (gs2_videocam_wght320): the glyph
+  Gemini's widget puts on its camera-Live button. Gemini has no icon specific to guided
+  vision, and this is the one it uses for the same surface. Only the colour is changed, to
+  the widget tint the other icons share.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <path
+        android:fillColor="@color/widget_icon_tint"
+        android:pathData="M397.42,722.62h47.14q33.43,0 57.71,0t42.77-2q55.71-5 84.55-34.49t33.27-82.57q1.95-18.46 1.97-42.48t0.03-57.34V456.72q0-33.32-0.03-57.34t-1.97-42.67q-5.05-55.45-34.8-84.02t-83.03-32.99q-18.49-2-42.72-2t-57.92,0H397.27q-33.43,0-57.71,0t-42.78,2q-55.64,5-84.31,34.49t-33.09,82.52q-2,18.65-2,42.67t0,57.34v47.01q0,33.32 0,57.34t2,42.65q5,55.45 34.53,83.96t82.87,32.94q18.5,2 42.73,2t57.92,0ZM397.5,784q-32.19,0-58.07,0t-47.31-2q-77.05-6.36-122.46-52.66t-51.71-120.9Q116,587.26 116,561.47t0-57.94V456.87q0-32.15 0-57.9t2-46.87q6.38-76.91 52.7-122.16t121.42-51.63q21.43-2 47.31-2t58.05,0H444.3q32.22,0 58.12,0t47.16,2q77.22,6.38 122.77,52.65t51.9,121.14q1.95,21.14 1.97,46.91t0.03,57.9v46.63q0,32.13-0.03,57.92t-1.97,47.01q-6.69,76.94-53.12,121.99T549.65,782q-21.33,2-47.2,2t-58.11,0H397.5ZM812.88,627.93q-12.68,0-21.68-8.86t-9.01-21.83V363.18q0-13.04 9.01-21.87t21.92-8.82q12.86,0 21.66,8.82t8.79,21.87V597.24q0,12.97-8.82,21.83t-21.87,8.86Z" />
+</vector>
