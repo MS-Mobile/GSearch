@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="widget_label">GSearch</string>
+    <string name="widget_description">Barra de pesquisa do Google com botões configuráveis</string>
+
+    <string name="widget_action_search">Pesquisar</string>
+    <string name="widget_action_mic">Pesquisa por voz</string>
+    <string name="widget_action_lens">Lens</string>
+    <string name="widget_action_gemini">Gemini</string>
+    <string name="widget_action_guided_vision">Visão guiada</string>
+    <string name="widget_action_live">Live</string>
+    <string name="widget_action_live_info">O Gemini só permite que outros apps abram o Live com a câmera ligada. Por isso, o GSearch o abre assim e o move para segundo plano assim que ele começa a ouvir, o que desliga a câmera e mantém o Live por voz funcionando.\n\nNa primeira vez, o Live fica aberto para você responder às perguntas do Gemini.\n\nSem acesso à câmera para o app Google, o Gemini pede esse acesso toda vez e o Live fica aberto; escolha Não, obrigado para continuar só com voz.</string>
+
+    <string name="config_title">Barra de pesquisa</string>
+    <string name="config_buttons_heading">Botões</string>
+    <string name="config_buttons_hint">Arraste a alça para reordenar. Tocar na própria barra sempre faz uma pesquisa.</string>
+    <string name="config_reorder_description">Reordenar %1$s</string>
+    <string name="config_info_description">Sobre %1$s</string>
+    <string name="config_info_dismiss">Entendi</string>
+    <string name="config_opacity_heading">Opacidade: %1$d%%</string>
+    <string name="config_add_to_home">Adicionar à tela inicial</string>
+    <string name="config_done">Concluído</string>
+    <string name="widget_action_unavailable">O app Google não consegue fazer isso agora</string>
+
+</resources>
